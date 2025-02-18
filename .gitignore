@@ -238,3 +238,8 @@ wheels/
 .vscode/
 *.swp
 *.swo
+
+# Gradio
+.gradio/
+.gradio/*
+*.pem
