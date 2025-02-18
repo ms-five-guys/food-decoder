@@ -27,6 +27,50 @@ project/
 - 영양 성분 정보 제공
 - 데이터베이스 검색 및 관리
 
+## 📊 System Interaction Flow
+이 다이어그램은 `service_ui` 모듈을 통해 사용자와 시스템 간의 상호작용을 설명합니다. 사용자가 Gradio UI를 통해 사진을 캡처하면, Gradio Server는 ML Server에 이미지를 전송하여 음식 이름을 예측합니다. 예측된 음식 이름은 Nutrition DB에 쿼리되어 영양 정보를 가져오고, 최종 결과는 사용자에게 표시됩니다.
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#1E90FF',
+      'primaryTextColor': '#FFFFFF',
+      'primaryBorderColor': '#4682B4',
+      'lineColor': '#32CD32',
+      'secondaryColor': '#FFD700',
+      'tertiaryColor': '#F0F8FF'
+    }
+  }
+}%%
+
+sequenceDiagram
+    actor User
+    participant UI as 📱 Gradio UI
+    participant Server as 🖥️ Gradio Server
+    participant ML as 🤖 ML Server
+    participant DB as 🔍 Nutrition DB
+    
+    User->>UI: Access Interface
+    UI->>User: Show Camera
+    
+    User->>UI: Capture Photo
+    UI->>Server: Send Image
+    
+    Server->>ML: Request Prediction
+    Note over ML: Process image<br/>Classify food
+    
+    ML->>Server: Return Food Name
+    Server->>DB: Query Nutrition Info using Food Name
+    Note over DB: Look up nutritional<br/>information
+    
+    DB->>Server: Return Nutrition Data
+    
+    Server->>UI: Format Result
+    UI->>User: Show Nutrition Info
+```
+
 ## 📚 참고 자료
 - [프로젝트 위키](https://github.com/ms-five-guys/food-decoder/wiki)
 - [문제 해결 가이드](https://github.com/ms-five-guys/food-decoder/wiki)
