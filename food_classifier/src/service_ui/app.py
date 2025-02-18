@@ -4,6 +4,29 @@ import numpy as np
 import requests
 import json
 
+def get_food_info_from_db(food_name):
+    """
+    Query the nutrition database for food information based on the food name.
+    TODO(GideokKim): Connect to Azure Database for MySQL server
+    """
+    # Mocked database response
+    mock_db_response = {
+        "김치찌개": {
+            "food_name": "김치찌개",
+            "serving_size": "1인분 (300g)",
+            "nutrition": {
+                "calories": "180kcal",
+                "carbohydrates": "15g",
+                "protein": "12g",
+                "fat": "8g",
+                "sodium": "1500mg",
+                "sugar": "3g"
+            }
+        }
+    }
+    
+    return mock_db_response.get(food_name, None)
+
 def process_image(image):
     """
     Process the captured image and get nutritional information
@@ -20,7 +43,7 @@ def process_image(image):
         # Convert image to bytes
         _, img_encoded = cv2.imencode('.jpg', image)
         img_bytes = img_encoded.tobytes()
-        # print("Image converted to bytes successfully")  # Debug log
+        print("Image converted to bytes successfully")  # Debug log
         
         # TODO(GideokKim): Uncomment when ML server is ready
         # # Send image to ML model server
@@ -32,26 +55,22 @@ def process_image(image):
         
         # if response.status_code == 200:
         #     result = response.json()
-        #     food_info = result.get("food_info", {})
+        #     food_name = result.get("food_name", "Unknown")
+        #     confidence = result.get("confidence", 0.0)
         
-        # Temporary test response with nutritional information
-        food_info = {
-            "food_name": "김치찌개",
-            "serving_size": "1인분 (300g)",
-            "nutrition": {
-                "calories": "180kcal",
-                "carbohydrates": "15g",
-                "protein": "12g",
-                "fat": "8g",
-                "sodium": "1500mg",
-                "sugar": "3g"
-            },
-            "confidence": 95.7
-        }
-            
+        # Temporary test response
+        food_name = "김치찌개"
+        confidence = 95.7
+        
+        # Query the database for food information
+        food_info = get_food_info_from_db(food_name)
+        
+        if not food_info:
+            return "No nutritional information found for the given food."
+        
         # Format the result
         return f"""음식: {food_info['food_name']}
-확률: {food_info['confidence']:.1f}%
+확률: {confidence:.1f}%
 1회 제공량: {food_info['serving_size']}
 
 영양성분:
