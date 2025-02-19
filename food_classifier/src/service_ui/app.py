@@ -1,9 +1,12 @@
 import gradio as gr
 import cv2
 import numpy as np
-from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server and database are ready
+import matplotlib.pyplot as plt
+from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server is ready
 from ml_client import MLClient
 from db_client import DatabaseClient
+
+plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 # Initialize the ML client
 ml_client = MLClient(
@@ -24,7 +27,7 @@ def get_patient_info(patient_code):
     Get patient information from the database using the patient code.
     """
     if not patient_code:
-        return None, "Please enter a patient code."
+        return None, "Please enter a patient code.", None, None
     
     try:
         # Connect to the database
@@ -37,24 +40,68 @@ def get_patient_info(patient_code):
         db_client.close()
         
         if not patient_info:
-            return None, "No patient information found for the given code."
+            return None, "No patient information found for the given code.", None, None
         
         # Format the patient info
         patient_info_text = f"""이름: {patient_info['basic_info']['name']}
 나이: {patient_info['basic_info'].get('age', 'N/A')}
 특이질환/특이사항: {patient_info['basic_info'].get('special_conditions', 'N/A')}"""
         
-        return patient_info['basic_info']['photo_url'], patient_info_text
-            
+        # Prepare recent nutrition data for display
+        recent_nutrition_data = [
+            {
+                "날짜": nutrition['date'],
+                "열량 (kcal)": nutrition['total_calories'],
+                "탄수화물 (g)": nutrition['total_carbohydrates'],
+                "단백질 (g)": nutrition['total_protein'],
+                "지방 (g)": nutrition['total_fat'],
+                "나트륨 (mg)": nutrition['total_sodium'],
+                "당류 (g)": nutrition['total_sugar']
+            }
+            for nutrition in patient_info['recent_nutrition']
+        ]
+        
+        # Create a text summary of recent nutrition
+        nutrition_summary = "\n".join(
+            f"{nutrition['date']}: 열량 {nutrition['total_calories']} kcal, "
+            f"탄수화물 {nutrition['total_carbohydrates']}g, 단백질 {nutrition['total_protein']}g, "
+            f"지방 {nutrition['total_fat']}g, 나트륨 {nutrition['total_sodium']}mg, 당류 {nutrition['total_sugar']}g"
+            for nutrition in patient_info['recent_nutrition']
+        )
+        
+        # Create a plot for recent nutrition
+        dates = [nutrition['date'] for nutrition in patient_info['recent_nutrition']]
+        calories = [nutrition['total_calories'] for nutrition in patient_info['recent_nutrition']]
+        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in patient_info['recent_nutrition']]
+        protein = [nutrition['total_protein'] for nutrition in patient_info['recent_nutrition']]
+        fat = [nutrition['total_fat'] for nutrition in patient_info['recent_nutrition']]
+        sodium = [nutrition['total_sodium'] for nutrition in patient_info['recent_nutrition']]
+        sugar = [nutrition['total_sugar'] for nutrition in patient_info['recent_nutrition']]
+        
+        plt.figure(figsize=(10, 5))
+        plt.plot(dates, calories, marker='o', label='Calories (kcal)')
+        plt.plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)')
+        plt.plot(dates, protein, marker='o', label='Protein (g)')
+        plt.plot(dates, fat, marker='o', label='Fat (g)')
+        plt.plot(dates, sodium, marker='o', label='Sodium (mg)')
+        plt.plot(dates, sugar, marker='o', label='Sugar (g)')
+        plt.title('Recent 5 Days Nutrition Intake')
+        plt.xlabel('Date')
+        plt.ylabel('Amount')
+        plt.xticks(rotation=45)
+        plt.legend()
+        plt.tight_layout()
+        
+        return patient_info['basic_info']['photo_url'], patient_info_text, nutrition_summary, plt
+        
     except Exception as e:
-        return None, f"Error retrieving patient information: {str(e)}"
+        return None, f"Error retrieving patient information: {str(e)}", None, None
 
 def get_nutritional_info(image):
     """
     Process the captured image and get nutritional information.
     """
     if image is None:
-        # print("No image received")  # Debug log
         return "No image captured"
     
     try:
@@ -86,12 +133,12 @@ def get_nutritional_info(image):
 1회 제공량: {food_info['serving_size']}
 
 영양성분:
-• 열량: {food_info['calories']}
-• 탄수화물: {food_info['carbohydrates']}
-• 단백질: {food_info['protein']}
-• 지방: {food_info['fat']}
-• 나트륨: {food_info['sodium']}
-• 당류: {food_info['sugar']}"""
+• 에너지(kcal): {food_info['calories']}
+• 수분(g): {food_info['water']}
+• 단백질(g): {food_info['protein']}
+• 지방(g): {food_info['fat']}
+• 탄수화물(g): {food_info['carbohydrates']}
+• 당류(g): {food_info['sugar']}"""
             
     except Exception as e:
         # print("Error:", str(e))  # Debug log
@@ -103,7 +150,9 @@ patient_info_interface = gr.Interface(
     inputs=gr.Textbox(label="Patient Code"),  # Add a textbox for patient code input
     outputs=[
         gr.Image(label="Patient Photo"),  # Display patient photo
-        gr.Textbox(label="Patient Information")  # Display patient information
+        gr.Textbox(label="Patient Information"),  # Display patient information
+        gr.Textbox(label="Recent Nutrition Summary"),  # Display recent nutrition summary
+        gr.Plot(label="Recent Nutrition Graph")  # Display recent nutrition graph
     ],
     title="📱 Patient Information",
     description="Enter patient code to get patient information",
@@ -142,8 +191,13 @@ if __name__ == "__main__":
                  "age": 3,
                  "special_conditions": "감기"
              },
-             "recent_diets": [],
-             "todays_diet": []
+             "recent_nutrition": [
+                 {"date": "2025-02-11", "total_calories": 1800, "total_water": 500, "total_protein": 80, "total_fat": 70, "total_carbohydrates": 200, "total_sugar": 50},
+                 {"date": "2025-02-12", "total_calories": 2200, "total_water": 550, "total_protein": 90, "total_fat": 80, "total_carbohydrates": 250, "total_sugar": 60},
+                 {"date": "2025-02-13", "total_calories": 2000, "total_water": 530, "total_protein": 85, "total_fat": 75, "total_carbohydrates": 230, "total_sugar": 55},
+                 {"date": "2025-02-14", "total_calories": 2100, "total_water": 540, "total_protein": 88, "total_fat": 78, "total_carbohydrates": 240, "total_sugar": 58},
+                 {"date": "2025-02-15", "total_calories": 1900, "total_water": 520, "total_protein": 82, "total_fat": 72, "total_carbohydrates": 220, "total_sugar": 52}
+             ]
          }), patch('db_client.DatabaseClient.get_food_info_from_db', return_value={
              "food_name": "김치찌개",
              "serving_size": "1인분 (300g)",

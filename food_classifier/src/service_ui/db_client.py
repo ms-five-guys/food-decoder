@@ -37,7 +37,7 @@ class DatabaseClient:
     def get_patient_info(self, patient_code):
         """
         Query the database for patient information, including photo, basic info,
-        recent 5 days diet, and today's diet.
+        and recent 5 days nutritional intake.
         """
         if not self.connection:
             print("No database connection.")
@@ -53,29 +53,24 @@ class DatabaseClient:
             if not patient_info:
                 return None
             
-            # Query for recent 5 days diet
+            # Query for recent 5 days nutritional intake
             five_days_ago = datetime.now() - timedelta(days=5)
             cursor.execute("""
-                SELECT * FROM patient_diets
+                SELECT date, SUM(calories) as total_calories, SUM(carbohydrates) as total_carbohydrates,
+                       SUM(protein) as total_protein, SUM(fat) as total_fat, SUM(sodium) as total_sodium,
+                       SUM(sugar) as total_sugar
+                FROM patient_diets
                 WHERE patient_code = %s AND date >= %s
+                GROUP BY date
                 ORDER BY date DESC
             """, (patient_code, five_days_ago))
-            recent_diets = cursor.fetchall()
-            
-            # Query for today's diet
-            today = datetime.now().date()
-            cursor.execute("""
-                SELECT * FROM patient_diets
-                WHERE patient_code = %s AND date = %s
-            """, (patient_code, today))
-            todays_diet = cursor.fetchall()
+            recent_nutrition = cursor.fetchall()
             
             cursor.close()
             
             return {
                 "basic_info": patient_info,
-                "recent_diets": recent_diets,
-                "todays_diet": todays_diet
+                "recent_nutrition": recent_nutrition
             }
             
         except mysql.connector.Error as err:
