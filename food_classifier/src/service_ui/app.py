@@ -22,33 +22,33 @@ db_client = DatabaseClient(
     database='database-name'  # database name
 )
 
-def get_patient_info(patient_code):
+def get_customer_info(customer_code):
     """
-    Get patient information from the database using the patient code.
+    Get customer information from the database using the customer code.
     """
-    if not patient_code:
-        return None, "Please enter a patient code.", None, None
+    if not customer_code:
+        return None, "Please enter a customer code.", None, None
     
     try:
         # Connect to the database
         db_client.connect()
         
-        # Query the database for patient information
-        patient_info = db_client.get_patient_info(patient_code)
+        # Query the database for customer information
+        customer_info = db_client.get_customer_info(customer_code)
         
         # Close the database connection
         db_client.close()
         
-        if not patient_info:
-            return None, "No patient information found for the given code.", None, None
+        if not customer_info:
+            return None, "No customer information found for the given code.", None, None
         
-        # Format the patient info
-        patient_info_text = f"""이름: {patient_info['basic_info']['name']}
-나이(주민번호 앞자리 6개): {patient_info['basic_info'].get('id_number', 'N/A')}
-성별: {patient_info['basic_info'].get('gender', 'N/A')}
-키: {patient_info['basic_info'].get('height', 'N/A')} cm
-몸무게: {patient_info['basic_info'].get('weight', 'N/A')} kg
-특이사항: {patient_info['basic_info'].get('special_conditions', 'N/A')}"""
+        # Format the customer info
+        customer_info_text = f"""이름: {customer_info['basic_info']['name']}
+나이(주민번호 앞자리 6개): {customer_info['basic_info'].get('id_number', 'N/A')}
+성별: {customer_info['basic_info'].get('gender', 'N/A')}
+키: {customer_info['basic_info'].get('height', 'N/A')} cm
+몸무게: {customer_info['basic_info'].get('weight', 'N/A')} kg
+특이사항: {customer_info['basic_info'].get('special_conditions', 'N/A')}"""
         
         # Prepare recent nutrition data for display
         recent_nutrition_data = [
@@ -61,7 +61,7 @@ def get_patient_info(patient_code):
                 "나트륨 (mg)": nutrition['total_sodium'],
                 "당류 (g)": nutrition['total_sugar']
             }
-            for nutrition in patient_info['recent_nutrition']
+            for nutrition in customer_info['recent_nutrition']
         ]
         
         # Create a text summary of recent nutrition
@@ -69,17 +69,17 @@ def get_patient_info(patient_code):
             f"{nutrition['date']}: 열량 {nutrition['total_calories']} kcal, "
             f"탄수화물 {nutrition['total_carbohydrates']}g, 단백질 {nutrition['total_protein']}g, "
             f"지방 {nutrition['total_fat']}g, 나트륨 {nutrition['total_sodium']}mg, 당류 {nutrition['total_sugar']}g"
-            for nutrition in patient_info['recent_nutrition']
+            for nutrition in customer_info['recent_nutrition']
         )
         
         # Create a plot for recent nutrition
-        dates = [nutrition['date'] for nutrition in patient_info['recent_nutrition']]
-        calories = [nutrition['total_calories'] for nutrition in patient_info['recent_nutrition']]
-        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in patient_info['recent_nutrition']]
-        protein = [nutrition['total_protein'] for nutrition in patient_info['recent_nutrition']]
-        fat = [nutrition['total_fat'] for nutrition in patient_info['recent_nutrition']]
-        sodium = [nutrition['total_sodium'] for nutrition in patient_info['recent_nutrition']]
-        sugar = [nutrition['total_sugar'] for nutrition in patient_info['recent_nutrition']]
+        dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
+        calories = [nutrition['total_calories'] for nutrition in customer_info['recent_nutrition']]
+        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in customer_info['recent_nutrition']]
+        protein = [nutrition['total_protein'] for nutrition in customer_info['recent_nutrition']]
+        fat = [nutrition['total_fat'] for nutrition in customer_info['recent_nutrition']]
+        sodium = [nutrition['total_sodium'] for nutrition in customer_info['recent_nutrition']]
+        sugar = [nutrition['total_sugar'] for nutrition in customer_info['recent_nutrition']]
         
         plt.figure(figsize=(10, 5))
         plt.plot(dates, calories, marker='o', label='Calories (kcal)')
@@ -95,10 +95,10 @@ def get_patient_info(patient_code):
         plt.legend()
         plt.tight_layout()
         
-        return patient_info['basic_info']['photo_url'], patient_info_text, nutrition_summary, plt
+        return customer_info['basic_info']['photo_url'], customer_info_text, nutrition_summary, plt
         
     except Exception as e:
-        return None, f"Error retrieving patient information: {str(e)}", None, None
+        return None, f"Error retrieving customer information: {str(e)}", None, None
 
 def get_nutritional_info(image):
     """
@@ -148,17 +148,17 @@ def get_nutritional_info(image):
         return f"Error processing image: {str(e)}"
 
 # Create Gradio interfaces
-patient_info_interface = gr.Interface(
-    fn=get_patient_info,
-    inputs=gr.Textbox(label="Patient Code"),  # Add a textbox for patient code input
+customer_info_interface = gr.Interface(
+    fn=get_customer_info,
+    inputs=gr.Textbox(label="Customer Code"),  # Add a textbox for customer code input
     outputs=[
-        gr.Image(label="Patient Photo"),  # Display patient photo
-        gr.Textbox(label="Patient Information"),  # Display patient information
+        gr.Image(label="Customer Photo"),  # Display customer photo
+        gr.Textbox(label="Customer Information"),  # Display customer information
         gr.Textbox(label="Recent Nutrition Summary"),  # Display recent nutrition summary
         gr.Plot(label="Recent Nutrition Graph")  # Display recent nutrition graph
     ],
-    title="📱 Patient Information",
-    description="Enter patient code to get patient information",
+    title="📱 Customer Information",
+    description="Enter customer code to get customer information",
     theme="default"
 )
 
@@ -177,8 +177,8 @@ nutritional_info_interface = gr.Interface(
 
 # Combine interfaces
 demo = gr.TabbedInterface(
-    [patient_info_interface, nutritional_info_interface],
-    ["Patient Info", "Nutritional Info"]
+    [customer_info_interface, nutritional_info_interface],
+    ["Customer Info", "Nutritional Info"]
 )
 
 # Run server
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     # Mock the database and ML server functions for testing
     with patch('db_client.DatabaseClient.connect', return_value=None), \
          patch('db_client.DatabaseClient.close', return_value=None), \
-         patch('db_client.DatabaseClient.get_patient_info', return_value={
+         patch('db_client.DatabaseClient.get_customer_info', return_value={
              "basic_info": {
                  "name": "아프냥",
                  "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",

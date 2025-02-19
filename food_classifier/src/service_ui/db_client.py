@@ -34,9 +34,9 @@ class DatabaseClient:
         if self.connection:
             self.connection.close()
 
-    def get_patient_info(self, patient_code):
+    def get_customer_info(self, customer_code):
         """
-        Query the database for patient information, including photo, basic info,
+        Query the database for customer information, including photo, basic info,
         and recent 5 days nutritional intake.
         """
         if not self.connection:
@@ -46,11 +46,11 @@ class DatabaseClient:
         try:
             cursor = self.connection.cursor(dictionary=True)
             
-            # Query for patient basic information and photo URL
-            cursor.execute("SELECT *, photo_url FROM patients WHERE patient_code = %s", (patient_code,))
-            patient_info = cursor.fetchone()
+            # Query for customer basic information and photo URL
+            cursor.execute("SELECT *, photo_url FROM customers WHERE customer_code = %s", (customer_code,))
+            customer_info = cursor.fetchone()
             
-            if not patient_info:
+            if not customer_info:
                 return None
             
             # Query for recent 5 days nutritional intake
@@ -59,17 +59,17 @@ class DatabaseClient:
                 SELECT date, SUM(calories) as total_calories, SUM(carbohydrates) as total_carbohydrates,
                        SUM(protein) as total_protein, SUM(fat) as total_fat, SUM(sodium) as total_sodium,
                        SUM(sugar) as total_sugar
-                FROM patient_diets
-                WHERE patient_code = %s AND date >= %s
+                FROM customer_diets
+                WHERE customer_code = %s AND date >= %s
                 GROUP BY date
                 ORDER BY date DESC
-            """, (patient_code, five_days_ago))
+            """, (customer_code, five_days_ago))
             recent_nutrition = cursor.fetchall()
             
             cursor.close()
             
             return {
-                "basic_info": patient_info,
+                "basic_info": customer_info,
                 "recent_nutrition": recent_nutrition
             }
             
