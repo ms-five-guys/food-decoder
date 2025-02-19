@@ -44,8 +44,11 @@ def get_patient_info(patient_code):
         
         # Format the patient info
         patient_info_text = f"""이름: {patient_info['basic_info']['name']}
-나이: {patient_info['basic_info'].get('age', 'N/A')}
-특이질환/특이사항: {patient_info['basic_info'].get('special_conditions', 'N/A')}"""
+나이(주민번호 앞자리 6개): {patient_info['basic_info'].get('id_number', 'N/A')}
+성별: {patient_info['basic_info'].get('gender', 'N/A')}
+키: {patient_info['basic_info'].get('height', 'N/A')} cm
+몸무게: {patient_info['basic_info'].get('weight', 'N/A')} kg
+특이사항: {patient_info['basic_info'].get('special_conditions', 'N/A')}"""
         
         # Prepare recent nutrition data for display
         recent_nutrition_data = [
@@ -188,7 +191,10 @@ if __name__ == "__main__":
              "basic_info": {
                  "name": "아프냥",
                  "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",
-                 "age": 3,
+                 "id_number": "990101",
+                 "gender": "여성",
+                 "height": 160,
+                 "weight": 50,
                  "special_conditions": "감기"
              },
              "recent_nutrition": [
