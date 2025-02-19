@@ -148,14 +148,17 @@ def get_customer_info(customer_code):
 
 def get_nutritional_info(image):
     """
-    Process the captured image and get nutritional information.
+    Process a single image and get nutritional information.
+    Returns a dictionary containing food information and confidence score.
     """
     if image is None:
-        return "No image captured"
+        return {
+            'error': "No image captured",
+            'food_info': None,
+            'confidence': 0
+        }
     
     try:
-        # print("Image shape:", image.shape)  # Debug log
-        
         # Convert image to bytes
         _, img_encoded = cv2.imencode('.jpg', image)
         img_bytes = img_encoded.tobytes()
@@ -174,21 +177,22 @@ def get_nutritional_info(image):
         db_client.close()
         
         if not food_info:
-            return "No nutritional information found for the given food."
+            return {
+                'error': f"No nutritional information found for {food_name}.",
+                'food_info': None,
+                'confidence': confidence
+            }
         
-        # Format the nutritional info
-        return f"""음식: {food_info['food_name']}
-확률: {confidence:.1f}%
-1회 제공량: {food_info['serving_size']}
-
-영양성분:
-• 에너지(kcal): {food_info['calories']}
-• 수분(g): {food_info['water']}
-• 단백질(g): {food_info['protein']}
-• 지방(g): {food_info['fat']}
-• 탄수화물(g): {food_info['carbohydrates']}
-• 당류(g): {food_info['sugar']}"""
-            
+        # Return the food information and confidence as a dictionary
+        return {
+            'error': None,
+            'food_info': food_info,
+            'confidence': confidence
+        }
+        
     except Exception as e:
-        # print("Error:", str(e))  # Debug log
-        return f"Error processing image: {str(e)}"
+        return {
+            'error': f"Error processing image: {str(e)}",
+            'food_info': None,
+            'confidence': 0
+        }
