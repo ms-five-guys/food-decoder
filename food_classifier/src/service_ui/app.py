@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server is ready
 from ml_client import MLClient
 from db_client import DatabaseClient
+from matplotlib import font_manager, rc
 
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
@@ -54,11 +55,11 @@ def get_customer_info(customer_code):
         recent_nutrition_data = [
             {
                 "날짜": nutrition['date'],
-                "열량 (kcal)": nutrition['total_calories'],
-                "탄수화물 (g)": nutrition['total_carbohydrates'],
+                "에너지 (kcal)": nutrition['total_calories'],
+                "수분 (g)": nutrition['total_water'],
                 "단백질 (g)": nutrition['total_protein'],
                 "지방 (g)": nutrition['total_fat'],
-                "나트륨 (mg)": nutrition['total_sodium'],
+                "탄수화물 (g)": nutrition['total_carbohydrates'],
                 "당류 (g)": nutrition['total_sugar']
             }
             for nutrition in customer_info['recent_nutrition']
@@ -66,29 +67,30 @@ def get_customer_info(customer_code):
         
         # Create a text summary of recent nutrition
         nutrition_summary = "\n".join(
-            f"{nutrition['date']}: 열량 {nutrition['total_calories']} kcal, "
-            f"탄수화물 {nutrition['total_carbohydrates']}g, 단백질 {nutrition['total_protein']}g, "
-            f"지방 {nutrition['total_fat']}g, 나트륨 {nutrition['total_sodium']}mg, 당류 {nutrition['total_sugar']}g"
+            f"{nutrition['date']}: 에너지 {nutrition['total_calories']} kcal, "
+            f"수분 {nutrition['total_water']}g, 단백질 {nutrition['total_protein']}g, "
+            f"지방 {nutrition['total_fat']}g, 탄수화물 {nutrition['total_carbohydrates']}g, "
+            f"당류 {nutrition['total_sugar']}g"
             for nutrition in customer_info['recent_nutrition']
         )
         
         # Create a plot for recent nutrition
         dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
         calories = [nutrition['total_calories'] for nutrition in customer_info['recent_nutrition']]
-        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in customer_info['recent_nutrition']]
+        water = [nutrition['total_water'] for nutrition in customer_info['recent_nutrition']]
         protein = [nutrition['total_protein'] for nutrition in customer_info['recent_nutrition']]
         fat = [nutrition['total_fat'] for nutrition in customer_info['recent_nutrition']]
-        sodium = [nutrition['total_sodium'] for nutrition in customer_info['recent_nutrition']]
+        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in customer_info['recent_nutrition']]
         sugar = [nutrition['total_sugar'] for nutrition in customer_info['recent_nutrition']]
         
         plt.figure(figsize=(10, 5))
         plt.plot(dates, calories, marker='o', label='Calories (kcal)')
-        plt.plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)')
+        plt.plot(dates, water, marker='o', label='Water (g)')
         plt.plot(dates, protein, marker='o', label='Protein (g)')
         plt.plot(dates, fat, marker='o', label='Fat (g)')
-        plt.plot(dates, sodium, marker='o', label='Sodium (mg)')
+        plt.plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)')
         plt.plot(dates, sugar, marker='o', label='Sugar (g)')
-        plt.title('Recent 5 Days Nutrition Intake')
+        plt.title('Nutritional Intake Over the Last 5 Days')
         plt.xlabel('Date')
         plt.ylabel('Amount')
         plt.xticks(rotation=45)
@@ -208,10 +210,10 @@ if __name__ == "__main__":
              "food_name": "김치찌개",
              "serving_size": "1인분 (300g)",
              "calories": "180kcal",
-             "carbohydrates": "15g",
+             "water": "50g",
              "protein": "12g",
              "fat": "8g",
-             "sodium": "1500mg",
+             "carbohydrates": "15g",
              "sugar": "3g"
          }), patch('ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.7)):
         demo.launch(
