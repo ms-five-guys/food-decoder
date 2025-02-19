@@ -51,20 +51,6 @@ def get_customer_info(customer_code):
 몸무게: {customer_info['basic_info'].get('weight', 'N/A')} kg
 특이사항: {customer_info['basic_info'].get('special_conditions', 'N/A')}"""
         
-        # Prepare recent nutrition data for display
-        recent_nutrition_data = [
-            {
-                "날짜": nutrition['date'],
-                "에너지 (kcal)": nutrition['total_calories'],
-                "수분 (g)": nutrition['total_water'],
-                "단백질 (g)": nutrition['total_protein'],
-                "지방 (g)": nutrition['total_fat'],
-                "탄수화물 (g)": nutrition['total_carbohydrates'],
-                "당류 (g)": nutrition['total_sugar']
-            }
-            for nutrition in customer_info['recent_nutrition']
-        ]
-        
         # Create a text summary of recent nutrition
         nutrition_summary = "\n".join(
             f"{nutrition['date']}: 에너지 {nutrition['total_calories']} kcal, "
