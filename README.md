@@ -28,7 +28,10 @@ project/
 - 데이터베이스 검색 및 관리
 
 ## 📊 System Interaction Flow
-이 다이어그램은 `service_ui` 모듈을 통해 사용자와 시스템 간의 상호작용을 설명합니다. 사용자가 Gradio UI를 통해 사진을 캡처하면, Gradio Server는 ML Server에 이미지를 전송하여 음식 이름을 예측합니다. 예측된 음식 이름은 Nutrition DB에 쿼리되어 영양 정보를 가져오고, 최종 결과는 사용자에게 표시됩니다.
+이 섹션은 `service_ui` 모듈을 통해 사용자와 시스템 간의 상호작용을 두 가지 주요 흐름으로 설명합니다. 첫 번째 흐름은 고객 정보와 최근 영양 성분 섭취 정보를 조회하는 과정이며, 두 번째 흐름은 이미지를 처리하여 영양 정보를 제공하는 과정입니다.
+
+### 1. 📊 Customer Information and Nutrition Retrieval
+이 다이어그램은 사용자가 Gradio UI를 통해 고객 코드를 입력하여 데이터베이스에서 고객 정보와 최근 5일치 영양 성분 섭취 정보를 조회하는 과정을 설명합니다. 조회된 정보는 사용자에게 표시됩니다.
 
 ```mermaid
 %%{
@@ -46,13 +49,49 @@ project/
 }%%
 
 sequenceDiagram
+    title Customer Information and Nutrition Retrieval
+    actor User
+    participant UI as 📱 Gradio UI
+    participant Server as 🖥️ Gradio Server
+    participant DB as 🔍 DataBase
+    
+    User->>UI: Access Interface
+    UI->>User: Request Customer Code
+    User->>UI: Enter Customer Code
+    UI->>Server: Send Customer Code
+    Server->>DB: Query Customer Info and Recent Nutrition
+    DB->>Server: Return Customer Info and Recent Nutrition
+    
+    Server->>UI: Display Customer Info and Recent Nutrition
+    UI->>User: Show Customer Info and Recent Nutrition
+```
+
+### 2. 📊 Image Processing and Nutrition Information
+이 다이어그램은 사용자가 Gradio UI를 통해 사진을 캡처하면, Gradio Server가 ML Server에 이미지를 전송하여 음식 이름을 예측하고, 예측된 음식 이름을 기반으로 데이터베이스에서 영양 정보를 조회하는 과정을 설명합니다. 최종 결과는 사용자에게 표시됩니다.
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#1E90FF',
+      'primaryTextColor': '#FFFFFF',
+      'primaryBorderColor': '#4682B4',
+      'lineColor': '#32CD32',
+      'secondaryColor': '#FFD700',
+      'tertiaryColor': '#F0F8FF'
+    }
+  }
+}%%
+
+sequenceDiagram
+    title Image Processing and Nutrition Information
     actor User
     participant UI as 📱 Gradio UI
     participant Server as 🖥️ Gradio Server
     participant ML as 🤖 ML Server
-    participant DB as 🔍 Nutrition DB
+    participant DB as 🔍 DataBase
     
-    User->>UI: Access Interface
     UI->>User: Show Camera
     
     User->>UI: Capture Photo
@@ -62,6 +101,8 @@ sequenceDiagram
     Note over ML: Process image<br/>Classify food
     
     ML->>Server: Return Food Name
+    Server->>DB: Record Food Consumption with Timestamp
+    Note over DB: Log food and<br/>consumption time
     Server->>DB: Query Nutrition Info using Food Name
     Note over DB: Look up nutritional<br/>information
     
