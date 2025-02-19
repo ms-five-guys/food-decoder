@@ -2,6 +2,7 @@ import gradio as gr
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import requests
 from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server is ready
 from ml_client import MLClient
 from db_client import DatabaseClient
@@ -43,22 +44,33 @@ def get_customer_info(customer_code):
         if not customer_info:
             return None, "No customer information found for the given code.", None, None
         
-        # Format the customer info
-        customer_info_text = f"""이름: {customer_info['basic_info']['name']}
-나이(주민번호 앞자리 6개): {customer_info['basic_info'].get('id_number', 'N/A')}
-성별: {customer_info['basic_info'].get('gender', 'N/A')}
-키: {customer_info['basic_info'].get('height', 'N/A')} cm
-몸무게: {customer_info['basic_info'].get('weight', 'N/A')} kg
-특이사항: {customer_info['basic_info'].get('special_conditions', 'N/A')}"""
+        # Format the customer info with HTML and CSS
+        customer_info_text = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
+        customer_info_text += "<strong>Customer Information</strong><br><br>"  # Add label as HTML
+        customer_info_text += "<table style='width:100%;'>"
+        customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['basic_info']['name']}</td></tr>"
+        customer_info_text += f"<tr><td><strong>생년월일</strong></td><td>{customer_info['basic_info'].get('id_number', 'N/A')}</td></tr>"
+        customer_info_text += f"<tr><td><strong>성별</strong></td><td>{customer_info['basic_info'].get('gender', 'N/A')}</td></tr>"
+        customer_info_text += f"<tr><td><strong>키</strong></td><td>{customer_info['basic_info'].get('height', 'N/A')} cm</td></tr>"
+        customer_info_text += f"<tr><td><strong>몸무게</strong></td><td>{customer_info['basic_info'].get('weight', 'N/A')} kg</td></tr>"
+        customer_info_text += f"<tr><td><strong>특이사항</strong></td><td>{customer_info['basic_info'].get('special_conditions', 'N/A')}</td></tr>"
+        customer_info_text += "</table>"
+        customer_info_text += "</div>"
         
-        # Create a text summary of recent nutrition
-        nutrition_summary = "\n".join(
-            f"{nutrition['date']}: 에너지 {nutrition['total_calories']} kcal, "
-            f"수분 {nutrition['total_water']}g, 단백질 {nutrition['total_protein']}g, "
-            f"지방 {nutrition['total_fat']}g, 탄수화물 {nutrition['total_carbohydrates']}g, "
-            f"당류 {nutrition['total_sugar']}g"
+        # Create a text summary of recent nutrition with colored text
+        nutrition_summary = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
+        nutrition_summary += "<strong>Recent Nutrition Summary</strong><br><br>"  # Add label as HTML
+        nutrition_summary += "<br>".join(
+            f"날짜: <span style='color:blue;'>{nutrition['date']}</span><br>"
+            f"  - 칼로리: <span style='color:red;'>{nutrition['total_calories']} kcal</span><br>"
+            f"  - 수분: <span style='color:green;'>{nutrition['total_water']}g</span><br>"
+            f"  - 단백질: <span style='color:orange;'>{nutrition['total_protein']}g</span><br>"
+            f"  - 지방: <span style='color:purple;'>{nutrition['total_fat']}g</span><br>"
+            f"  - 탄수화물: <span style='color:brown;'>{nutrition['total_carbohydrates']}g</span><br>"
+            f"  - 당류: <span style='color:pink;'>{nutrition['total_sugar']}g</span><br>"
             for nutrition in customer_info['recent_nutrition']
         )
+        nutrition_summary += "</div>"
         
         # Create a plot for recent nutrition
         dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
@@ -69,21 +81,63 @@ def get_customer_info(customer_code):
         carbohydrates = [nutrition['total_carbohydrates'] for nutrition in customer_info['recent_nutrition']]
         sugar = [nutrition['total_sugar'] for nutrition in customer_info['recent_nutrition']]
         
-        plt.figure(figsize=(10, 5))
-        plt.plot(dates, calories, marker='o', label='Calories (kcal)')
-        plt.plot(dates, water, marker='o', label='Water (g)')
-        plt.plot(dates, protein, marker='o', label='Protein (g)')
-        plt.plot(dates, fat, marker='o', label='Fat (g)')
-        plt.plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)')
-        plt.plot(dates, sugar, marker='o', label='Sugar (g)')
-        plt.title('Nutritional Intake Over the Last 5 Days')
-        plt.xlabel('Date')
-        plt.ylabel('Amount')
-        plt.xticks(rotation=45)
-        plt.legend()
+        # Create separate plots for each nutritional component
+        fig, axs = plt.subplots(3, 2, figsize=(12, 10))  # 3 rows, 2 columns
+
+        # Plot Calories
+        axs[0, 0].plot(dates, calories, marker='o', label='Calories (kcal)', color='r')
+        axs[0, 0].set_title('Calories')
+        axs[0, 0].set_xlabel('Date')
+        axs[0, 0].set_ylabel('kcal')
+        axs[0, 0].tick_params(axis='x', rotation=45)
+
+        # Plot Water
+        axs[0, 1].plot(dates, water, marker='o', label='Water (g)', color='b')
+        axs[0, 1].set_title('Water')
+        axs[0, 1].set_xlabel('Date')
+        axs[0, 1].set_ylabel('g')
+        axs[0, 1].tick_params(axis='x', rotation=45)
+
+        # Plot Protein
+        axs[1, 0].plot(dates, protein, marker='o', label='Protein (g)', color='g')
+        axs[1, 0].set_title('Protein')
+        axs[1, 0].set_xlabel('Date')
+        axs[1, 0].set_ylabel('g')
+        axs[1, 0].tick_params(axis='x', rotation=45)
+
+        # Plot Fat
+        axs[1, 1].plot(dates, fat, marker='o', label='Fat (g)', color='m')
+        axs[1, 1].set_title('Fat')
+        axs[1, 1].set_xlabel('Date')
+        axs[1, 1].set_ylabel('g')
+        axs[1, 1].tick_params(axis='x', rotation=45)
+
+        # Plot Carbohydrates
+        axs[2, 0].plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)', color='c')
+        axs[2, 0].set_title('Carbohydrates')
+        axs[2, 0].set_xlabel('Date')
+        axs[2, 0].set_ylabel('g')
+        axs[2, 0].tick_params(axis='x', rotation=45)
+
+        # Plot Sugar
+        axs[2, 1].plot(dates, sugar, marker='o', label='Sugar (g)', color='y')
+        axs[2, 1].set_title('Sugar')
+        axs[2, 1].set_xlabel('Date')
+        axs[2, 1].set_ylabel('g')
+        axs[2, 1].tick_params(axis='x', rotation=45)
+
         plt.tight_layout()
-        
-        return customer_info['basic_info']['photo_url'], customer_info_text, nutrition_summary, plt
+
+        # Load the image from the URL
+        image_url = customer_info['basic_info']['photo_url']
+        response = requests.get(image_url)
+        image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+        # Resize the image to the desired size
+        resized_image = cv2.resize(image, (300, 300))  # Resize to 300x300 pixels
+
+        return resized_image, customer_info_text, nutrition_summary, fig
         
     except Exception as e:
         return None, f"Error retrieving customer information: {str(e)}", None, None
@@ -138,12 +192,12 @@ def get_nutritional_info(image):
 # Create Gradio interfaces
 customer_info_interface = gr.Interface(
     fn=get_customer_info,
-    inputs=gr.Textbox(label="Customer Code"),  # Add a textbox for customer code input
+    inputs=gr.Textbox(label="Customer Code"),
     outputs=[
-        gr.Image(label="Customer Photo"),  # Display customer photo
-        gr.Textbox(label="Customer Information"),  # Display customer information
-        gr.Textbox(label="Recent Nutrition Summary"),  # Display recent nutrition summary
-        gr.Plot(label="Recent Nutrition Graph")  # Display recent nutrition graph
+        gr.Image(label="Customer Photo", width=300, height=300),  # Display customer photo
+        gr.HTML(label="Customer Information"),  # Display customer information
+        gr.HTML(label="Recent Nutrition Summary"),  # Display recent nutrition summary
+        gr.Plot(label=" ")  # Display recent nutrition graph
     ],
     title="📱 Customer Information",
     description="Enter customer code to get customer information",
