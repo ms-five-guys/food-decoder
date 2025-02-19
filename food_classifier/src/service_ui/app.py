@@ -1,10 +1,23 @@
 import gradio as gr
 import cv2
 import numpy as np
-import json
-from unittest.mock import patch # TODO(GideokKim): Remove this import when ML server is ready
-from ml_client import get_food_prediction_from_ml_server
-from db_client import get_food_info_from_db
+from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server and database are ready
+from ml_client import MLClient
+from db_client import DatabaseClient
+
+# Initialize the ML client
+ml_client = MLClient(
+    server_url='custom-vision-server-url',  # Custom Vision Server URL
+    prediction_key='prediction-key'         # prediction key
+)
+
+# Initialize the database client
+db_client = DatabaseClient(
+    host='azure-mysql-host',  # Azure MySQL host
+    user='username',          # MySQL username
+    password='password',      # MySQL password
+    database='database-name'  # database name
+)
 
 def process_image(image):
     """
@@ -24,11 +37,17 @@ def process_image(image):
         img_bytes = img_encoded.tobytes()
         print("Image converted to bytes successfully")  # Debug log
         
-        # Get food prediction from ML server
-        food_name, confidence = get_food_prediction_from_ml_server(img_bytes)
+        # Get food prediction from Custom Vision Server
+        food_name, confidence = ml_client.get_food_prediction(img_bytes)
+        
+        # Connect to the database
+        db_client.connect()
         
         # Query the database for food information
-        food_info = get_food_info_from_db(food_name)
+        food_info = db_client.get_food_info_from_db(food_name)
+        
+        # Close the database connection
+        db_client.close()
         
         if not food_info:
             return "No nutritional information found for the given food."
@@ -39,12 +58,12 @@ def process_image(image):
 1회 제공량: {food_info['serving_size']}
 
 영양성분:
-• 열량: {food_info['nutrition']['calories']}
-• 탄수화물: {food_info['nutrition']['carbohydrates']}
-• 단백질: {food_info['nutrition']['protein']}
-• 지방: {food_info['nutrition']['fat']}
-• 나트륨: {food_info['nutrition']['sodium']}
-• 당류: {food_info['nutrition']['sugar']}"""
+• 열량: {food_info['calories']}
+• 탄수화물: {food_info['carbohydrates']}
+• 단백질: {food_info['protein']}
+• 지방: {food_info['fat']}
+• 나트륨: {food_info['sodium']}
+• 당류: {food_info['sugar']}"""
             
     except Exception as e:
         # print("Error:", str(e))  # Debug log
@@ -70,19 +89,20 @@ demo = gr.Interface(
 
 # Run server
 if __name__ == "__main__":
+    # TODO(GideokKim): Remove this patch when ML server and database are ready
     # Mock the database and ML server functions for testing
-    with patch('db_client.get_food_info_from_db', return_value={
-        "food_name": "김치찌개",
-        "serving_size": "1인분 (300g)",
-        "nutrition": {
-            "calories": "180kcal",
-            "carbohydrates": "15g",
-            "protein": "12g",
-            "fat": "8g",
-            "sodium": "1500mg",
-            "sugar": "3g"
-        }
-    }), patch('ml_client.get_food_prediction_from_ml_server', return_value=("김치찌개", 95.7)):
+    with patch('db_client.DatabaseClient.connect', return_value=None), \
+         patch('db_client.DatabaseClient.close', return_value=None), \
+         patch('db_client.DatabaseClient.get_food_info_from_db', return_value={
+             "food_name": "김치찌개",
+             "serving_size": "1인분 (300g)",
+             "calories": "180kcal",
+             "carbohydrates": "15g",
+             "protein": "12g",
+             "fat": "8g",
+             "sodium": "1500mg",
+             "sugar": "3g"
+         }), patch('ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.7)):
         demo.launch(
             server_name="0.0.0.0",  # Allow external connections
             server_port=7860,       # Specify port
