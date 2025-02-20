@@ -321,9 +321,12 @@ def create_interfaces():
         
         with gr.Row():
             image_input = gr.Image(
-                sources=["webcam", "upload"],
+                sources=["upload", "webcam"],
                 type="numpy",
-                label="Camera"
+                label="Camera",
+                height=320,
+                width=400,
+                mirror_webcam=False
             )
 
         # Submit button in its own row
