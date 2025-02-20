@@ -15,10 +15,7 @@ from clients.db_client import DatabaseClient
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 # Initialize the ML client
-ml_client = MLClient(
-    server_url='custom-vision-server-url',  # Custom Vision Server URL
-    prediction_key='prediction-key'         # prediction key
-)
+ml_client = MLClient()
 
 # Initialize the database client
 db_client = DatabaseClient(

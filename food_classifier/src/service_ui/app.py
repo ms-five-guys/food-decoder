@@ -42,7 +42,7 @@ if __name__ == "__main__":
              "fat": "8g",
              "carbohydrates": "15g",
              "sugar": "3g"
-         }), patch('clients.ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.7)):
+         }):
         demo.launch(
             server_name="0.0.0.0",  # Allow external connections
             server_port=7860,       # Specify port
