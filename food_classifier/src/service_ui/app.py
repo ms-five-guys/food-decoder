@@ -36,7 +36,6 @@ if __name__ == "__main__":
              ]
          }), patch('clients.db_client.DatabaseClient.get_food_info_from_db', return_value={
              "food_name": "김치찌개",
-             "serving_size": "1인분 (300g)",
              "calories": "180kcal",
              "water": "50g",
              "protein": "12g",
