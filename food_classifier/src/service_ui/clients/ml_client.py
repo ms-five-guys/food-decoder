@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import requests
 
 class MLClient:
@@ -6,22 +7,18 @@ class MLClient:
         """
         Initialize the ML client with Azure Custom Vision configuration.
         """
-        # Read configuration from env file
-        env_path = os.path.join(os.path.dirname(__file__), '.env')
-        config = {}
+        env_path = Path('/etc/food-classifier/.env')
         
         with open(env_path, 'r') as f:
             for line in f:
                 if '=' in line:
-                    key, value = line.strip().split('=')
-                    # Remove quotes if present
-                    config[key.strip()] = value.strip().strip('"').strip("'")
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value.strip('"').strip("'")
         
-        # Get Azure Custom Vision configuration
-        self.endpoint = config.get('AZURE_CUSTOM_VISION_ENDPOINT')
-        self.prediction_key = config.get('AZURE_CUSTOM_VISION_API_KEY')
-        self.project_id = config.get('AZURE_CUSTOM_VISION_PROJECT_ID')
-        self.model_name = config.get('AZURE_CUSTOM_VISION_MODEL_NAME')
+        self.endpoint = os.getenv('AZURE_CUSTOM_VISION_ENDPOINT')
+        self.api_key = os.getenv('AZURE_CUSTOM_VISION_API_KEY')
+        self.project_id = os.getenv('AZURE_CUSTOM_VISION_PROJECT_ID')
+        self.model_name = os.getenv('AZURE_CUSTOM_VISION_MODEL_NAME')
         
         # Construct the prediction URL
         self.prediction_url = f"{self.endpoint}/customvision/v3.0/Prediction/{self.project_id}/classify/iterations/{self.model_name}/image"
@@ -38,7 +35,7 @@ class MLClient:
         """
         headers = {
             'Content-Type': 'application/octet-stream',
-            'Prediction-Key': self.prediction_key
+            'Prediction-Key': self.api_key
         }
         
         try:
