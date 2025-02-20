@@ -4,8 +4,8 @@ from components.data_processing import get_customer_info, get_nutritional_info
 
 def extract_number(value):
     """
-    문자열에서 숫자만 추출하여 float로 변환
-    예: '180kcal' -> 180.0
+    extract numbers from string and convert to float
+    example: '180kcal' -> 180.0
     """
     if isinstance(value, (int, float)):
         return float(value)
@@ -14,7 +14,7 @@ def extract_number(value):
 
 def create_table_row(food_info, confidence):
     """
-    Create an HTML table row for the food information
+    create an HTML table row for the food information
     """
     return f"""
     <tr>
@@ -88,12 +88,12 @@ def create_food_card(food_info, confidence):
 
 def create_warning_section(totals):
     """
-    영양성분 초과 섭취 경고 섹션 생성
+    create warning section for nutritional components intake
     """
     recommended = get_recommended_daily_values()
     warnings = []
     
-    # 각 영양소별 섭취 비율 계산 및 100% 초과 항목 확인
+    # calculate intake percentage for each nutritional component and check if it exceeds 100%
     percentages = {
         '에너지': (totals['calories'] / recommended['calories']) * 100,
         '수분': (totals['water'] / recommended['water']) * 100,
@@ -103,11 +103,11 @@ def create_warning_section(totals):
         '당류': (totals['sugar'] / recommended['sugar']) * 100
     }
     
-    # 100% 초과 항목 수집
+    # collect over items 100%
     over_items = [f"{name}({int(pct)}%)" for name, pct in percentages.items() if pct > 100]
     
     if not over_items:
-        return ""  # 초과 항목이 없으면 빈 문자열 반환
+        return ""  # if no over items, return empty string
     
     warning_text = ", ".join(over_items) + " 항목에서 권장섭취량을 초과했습니다."
     
@@ -125,8 +125,35 @@ def process_and_append(image, history):
     """
     Process new image and append result to history
     """
+    # if image is not present, process
+    if image is None:
+        error_html = f"""
+        <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
+             background-color: #FFEBEE; overflow: hidden;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+            <div style="font-size: 0.9em; color: #C62828;">
+                이미지를 먼저 촬영해주세요.
+            </div>
+        </div>
+        """
+        return history + error_html if history else error_html, history if history else ""
+    
+    # 이미지가 있는 경우 기존 로직 실행
     new_result = get_nutritional_info(image)
     
+    # get_nutritional_info 결과 검증
+    if not new_result or 'food_info' not in new_result:
+        error_html = f"""
+        <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
+             background-color: #FFEBEE; overflow: hidden;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+            <div style="font-size: 0.9em; color: #C62828;">
+                음식을 인식할 수 없습니다. 다시 시도해주세요.
+            </div>
+        </div>
+        """
+        return history + error_html if history else error_html, history if history else ""
+
     if not history:
         # Initialize totals
         totals = {
@@ -233,7 +260,7 @@ def update_summary_table(html, totals):
 
 def create_summary_section(totals):
     """
-    영양성분 총계 섹션 생성
+    create summary section for nutritional components
     """
     recommended = get_recommended_daily_values()
     
@@ -288,9 +315,9 @@ def create_summary_section(totals):
 
 def get_recommended_daily_values():
     """
-    일일 권장 섭취량 반환
-    한국영양학회 2020 한국인 영양소 섭취기준 기반
-    성인 남성 기준 (19-29세)
+    return daily recommended intake
+    based on 2020 Korean Dietary Reference Intakes for Koreans
+    adult male standard (19-29 years old)
     """
     return {
         'calories': 2600,     # kcal
@@ -318,7 +345,7 @@ def create_interfaces():
 
     with gr.Blocks() as nutritional_info_interface:
         gr.Markdown("## 🥗 Nutritional Information")
-        
+
         with gr.Row():
             image_input = gr.Image(
                 sources=["upload", "webcam"],
@@ -329,19 +356,54 @@ def create_interfaces():
                 mirror_webcam=False
             )
 
-        # Submit button in its own row
-        submit_btn = gr.Button("Submit", variant="primary")
-
         with gr.Row():
-            result_output = gr.HTML(label="Nutritional Information")
+            submit_btn = gr.Button("Submit", variant="primary")
+
+        # error message for error handling
+        error_output = gr.HTML(label="", elem_classes=["error-message"])
+
+        # result output for result
+        result_output = gr.HTML(label="Nutritional Information")
 
         # State to store the history
         result_state = gr.State("")
-        
+
+        def process_with_error_handling(image, history):
+            """
+            image processing and error handling
+            """
+            if image is None:
+                error_html = f"""
+                <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; 
+                     background-color: #FFEBEE; overflow: hidden;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+                    <div style="font-size: 0.9em; color: #C62828;">
+                        이미지를 먼저 촬영해주세요.
+                    </div>
+                </div>
+                """
+                return error_html, "", history  # error message, empty result, keep previous history
+
+            # if image is present, process
+            try:
+                result = process_and_append(image, history)
+                return "", result[0], result[1]  # empty error message, result, new history
+            except Exception as e:
+                error_html = f"""
+                <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; 
+                     background-color: #FFEBEE; overflow: hidden;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+                    <div style="font-size: 0.9em; color: #C62828;">
+                        음식을 인식할 수 없습니다. 다시 시도해주세요.
+                    </div>
+                </div>
+                """
+                return error_html, "", history  # error message, empty result, keep previous history
+
         submit_btn.click(
-            fn=process_and_append,
+            fn=process_with_error_handling,
             inputs=[image_input, result_state],
-            outputs=[result_output, result_state]
+            outputs=[error_output, result_output, result_state]
         )
 
     return customer_info_interface, nutritional_info_interface
