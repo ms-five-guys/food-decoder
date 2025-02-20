@@ -27,12 +27,17 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # update system packages
+            # Update and install system packages
             sudo apt update
             sudo apt install -y python3-pip python3-dev build-essential
             sudo apt install -y libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev
+            sudo apt install -y debianutils  # Install 'which' command
+            
+            # Install Node.js
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt install -y nodejs
 
-            # 환경 변수 파일 생성 (600 권한으로)
+            # Create environment variable file (with 600 permission)
             umask 077
             cat > /etc/food-classifier/.env << 'EOL'
             AZURE_CUSTOM_VISION_ENDPOINT="${{ secrets.AZURE_CUSTOM_VISION_ENDPOINT }}"
@@ -43,15 +48,16 @@ jobs:
             
             cd ~/food-classifier
             
-            # create virtual environment
-            rm -rf venv
-            python3 -m venv venv
+            # Activate virtual environment (reuse if exists)
+            if [ ! -d "venv" ]; then
+                python3 -m venv venv
+            fi
             source venv/bin/activate
             
-            # upgrade pip and install packages
+            # Upgrade pip and install packages
             pip install --upgrade pip
             pip install wheel setuptools
             pip install -r requirements.txt
             
-            # service restart
+            # Restart service
             sudo systemctl restart food-classifier
