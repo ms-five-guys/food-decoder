@@ -27,7 +27,12 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # create environment variable file (600 permission)
+            # update system packages
+            sudo apt update
+            sudo apt install -y python3-pip python3-dev build-essential
+            sudo apt install -y libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev
+
+            # 환경 변수 파일 생성 (600 권한으로)
             umask 077
             cat > /etc/food-classifier/.env << 'EOL'
             AZURE_CUSTOM_VISION_ENDPOINT="${{ secrets.AZURE_CUSTOM_VISION_ENDPOINT }}"
@@ -39,8 +44,13 @@ jobs:
             cd ~/food-classifier
             
             # create virtual environment
+            rm -rf venv
             python3 -m venv venv
             source venv/bin/activate
+            
+            # upgrade pip and install packages
+            pip install --upgrade pip
+            pip install wheel setuptools
             pip install -r requirements.txt
             
             # service restart
