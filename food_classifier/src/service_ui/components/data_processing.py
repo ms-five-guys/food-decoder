@@ -1,5 +1,6 @@
 import sys
 import os
+import io
 
 # Add the parent directory to the system path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -146,7 +147,12 @@ def get_customer_info(customer_code):
 def get_nutritional_info(image):
     """
     Process a single image and get nutritional information.
-    Returns a dictionary containing food information and confidence score.
+    
+    Args:
+        image: PIL.Image object
+        
+    Returns:
+        dict: Contains food information, confidence score, and any error messages
     """
     if image is None:
         return {
@@ -156,10 +162,10 @@ def get_nutritional_info(image):
         }
     
     try:
-        # Convert image to bytes
-        _, img_encoded = cv2.imencode('.jpg', image)
-        img_bytes = img_encoded.tobytes()
-        print("Image converted to bytes successfully")  # Debug log
+        # Convert PIL image to bytes
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        img_bytes = img_byte_arr.getvalue()
         
         # Get food prediction from Custom Vision Server
         food_name, confidence = ml_client.get_food_prediction(img_bytes)
