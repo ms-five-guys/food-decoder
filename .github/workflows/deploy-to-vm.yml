@@ -1,0 +1,64 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+      #- feat/impl-service-ui
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Copy files to VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "."
+          target: "/home/${{ secrets.VM_USERNAME }}/food-classifier"
+          
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            # Update and install system packages
+            sudo apt update
+            sudo apt install -y python3-pip python3-dev build-essential
+            sudo apt install -y libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev
+            sudo apt install -y debianutils  # Install 'which' command
+            
+            # Install Node.js
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt install -y nodejs
+
+            # Create environment variable file (with 600 permission)
+            umask 077
+            cat > /etc/food-classifier/.env << 'EOL'
+            AZURE_CUSTOM_VISION_ENDPOINT="${{ secrets.AZURE_CUSTOM_VISION_ENDPOINT }}"
+            AZURE_CUSTOM_VISION_API_KEY="${{ secrets.AZURE_CUSTOM_VISION_API_KEY }}"
+            AZURE_CUSTOM_VISION_PROJECT_ID="${{ secrets.AZURE_CUSTOM_VISION_PROJECT_ID }}"
+            AZURE_CUSTOM_VISION_MODEL_NAME="${{ secrets.AZURE_CUSTOM_VISION_MODEL_NAME }}"
+            EOL
+            
+            cd ~/food-classifier
+            
+            # Activate virtual environment (reuse if exists)
+            if [ ! -d "venv" ]; then
+                python3 -m venv venv
+            fi
+            source venv/bin/activate
+            
+            # Upgrade pip and install packages
+            pip install --upgrade pip
+            pip install wheel setuptools
+            pip install -r requirements.txt
+            
+            # Restart service
+            sudo systemctl restart food-classifier

@@ -9,44 +9,17 @@
 
 ### 필수 요구사항
 - Python 3.9 이상
-- pip (Python 패키지 관리자)
 - Git
-
-### ⚙️ 환경 설정
-
-1. **저장소 클론**
-```bash
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
-```
-
-2. **가상환경 설정**
-```bash
-# 가상환경 생성
-python -m venv venv
-
-# 가상환경 활성화
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
-```
-
-3. **필요한 패키지 설치**
-```bash
-pip install -r requirements.txt
-```
 
 ## 📁 프로젝트 구조
 ```
 project/
 │
-├── data/               # 데이터셋 저장소
 ├── models/            # 학습된 모델 파일
 ├── src/               # 소스 코드
-├── tools/             # 유틸리티 스크립트
+├── experiments/       # 실험 결과
 ├── requirements.txt   # 프로젝트 의존성
-└── README.md         # 프로젝트 문서
+└── README.md          # 프로젝트 문서
 ```
 
 ## 🛠️ 주요 기능
@@ -54,65 +27,94 @@ project/
 - 영양 성분 정보 제공
 - 데이터베이스 검색 및 관리
 
+## 📊 System Interaction Flow
+이 섹션은 `service_ui` 모듈을 통해 사용자와 시스템 간의 상호작용을 두 가지 주요 흐름으로 설명합니다. 첫 번째 흐름은 고객 정보와 최근 영양 성분 섭취 정보를 조회하는 과정이며, 두 번째 흐름은 이미지를 처리하여 영양 정보를 제공하는 과정입니다.
+
+### 1. 📊 Customer Information and Nutrition Retrieval
+이 다이어그램은 사용자가 Gradio UI를 통해 고객 코드를 입력하여 데이터베이스에서 고객 정보와 최근 5일치 영양 성분 섭취 정보를 조회하는 과정을 설명합니다. 조회된 정보는 사용자에게 표시됩니다.
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#1E90FF',
+      'primaryTextColor': '#FFFFFF',
+      'primaryBorderColor': '#4682B4',
+      'lineColor': '#32CD32',
+      'secondaryColor': '#FFD700',
+      'tertiaryColor': '#F0F8FF'
+    }
+  }
+}%%
+
+sequenceDiagram
+    title Customer Information and Nutrition Retrieval
+    actor User
+    participant UI as 📱 Gradio UI
+    participant Server as 🖥️ Gradio Server
+    participant DB as 🔍 DataBase
+    
+    User->>UI: Access Interface
+    UI->>User: Request Customer Code
+    User->>UI: Enter Customer Code
+    UI->>Server: Send Customer Code
+    Server->>DB: Query Customer Info and Recent Nutrition
+    DB->>Server: Return Customer Info and Recent Nutrition
+    
+    Server->>UI: Display Customer Info and Recent Nutrition
+    UI->>User: Show Customer Info and Recent Nutrition
+```
+
+### 2. 📊 Image Processing and Nutrition Information
+이 다이어그램은 사용자가 Gradio UI를 통해 사진을 캡처하면, Gradio Server가 ML Server에 이미지를 전송하여 음식 이름을 예측하고, 예측된 음식 이름을 기반으로 데이터베이스에서 영양 정보를 조회하는 과정을 설명합니다. 최종 결과는 사용자에게 표시됩니다.
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#1E90FF',
+      'primaryTextColor': '#FFFFFF',
+      'primaryBorderColor': '#4682B4',
+      'lineColor': '#32CD32',
+      'secondaryColor': '#FFD700',
+      'tertiaryColor': '#F0F8FF'
+    }
+  }
+}%%
+
+sequenceDiagram
+    title Image Processing and Nutrition Information
+    actor User
+    participant UI as 📱 Gradio UI
+    participant Server as 🖥️ Gradio Server
+    participant ML as 🤖 ML Server
+    participant DB as 🔍 DataBase
+    
+    UI->>User: Show Camera
+    
+    User->>UI: Capture Photo
+    UI->>Server: Send Image
+    
+    Server->>ML: Request Prediction
+    Note over ML: Process image<br/>Classify food
+    
+    ML->>Server: Return Food Name
+    Server->>DB: Record Food Consumption with Timestamp
+    Note over DB: Log food and<br/>consumption time
+    Server->>DB: Query Nutrition Info using Food Name
+    Note over DB: Look up nutritional<br/>information
+    
+    DB->>Server: Return Nutrition Data
+    
+    Server->>UI: Format Result
+    UI->>User: Show Nutrition Info
+```
+
 ## 📚 참고 자료
 - [프로젝트 위키](https://github.com/ms-five-guys/food-decoder/wiki)
 - [문제 해결 가이드](https://github.com/ms-five-guys/food-decoder/wiki)
-
-## 🤝 기여하기
-
-### Fork 및 Clone 설정
-1. GitHub에서 프로젝트를 Fork 합니다.
-2. Fork한 저장소를 로컬에 Clone 합니다:
-```bash
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
-```
-
-### Upstream 설정
-3. 원본 저장소를 upstream으로 등록합니다:
-```bash
-# upstream 저장소 추가
-git remote add upstream git@github.com:ms-five-guys/food-decoder.git
-
-# 설정된 remote 저장소 확인
-git remote -v
-```
-
-### 브랜치 동기화
-4. 원본 저장소의 최신 변경사항을 가져옵니다:
-```bash
-# upstream의 변경사항 가져오기
-git fetch upstream
-
-# 로컬 main 브랜치로 이동
-git checkout main
-
-# upstream의 변경사항을 로컬 main에 병합
-git merge upstream/main
-
-# 변경사항을 fork한 저장소에 반영
-git push origin main
-```
-
-### 기능 개발
-5. 새로운 기능 브랜치 생성:
-```bash
-git checkout -b feature/your-feature-name
-```
-
-6. 변경사항 커밋:
-```bash
-git add .
-gitmoji -c
-git push origin feature/your-feature-name
-```
-
-7. GitHub에서 Pull Request 생성
-
-### 주의사항
-- PR 생성 전에 항상 upstream의 최신 변경사항을 동기화해주세요
-- 하나의 PR에는 하나의 기능/수정만 담아주세요
-- 커밋 메시지는 명확하게 작성해주세요
 
 ## 📝 라이선스
 이 프로젝트는 [라이선스명] 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
