@@ -349,7 +349,7 @@ def create_interfaces():
         with gr.Row():
             image_input = gr.Image(
                 sources=["upload", "webcam"],
-                type="numpy",
+                type="pil",
                 label="Camera",
                 height=320,
                 width=400,
