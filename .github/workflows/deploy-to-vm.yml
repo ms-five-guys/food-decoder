@@ -3,7 +3,8 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - feat/impl-service-ui
+      - main
+      #- feat/impl-service-ui
 
 jobs:
   deploy:
