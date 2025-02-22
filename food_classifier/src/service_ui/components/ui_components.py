@@ -1,6 +1,18 @@
+import os
+import sys
 import gradio as gr
 import re
-from components.data_processing import get_customer_info, get_nutritional_info
+
+# Add the components directory to the system path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+
+from utils.customer_processing import CustomerProcessor
+from utils.food_processing import FoodProcessor
+
+# 프로세서 인스턴스 생성
+customer_processor = CustomerProcessor()
+food_processor = FoodProcessor()
 
 def extract_number(value):
     """
@@ -139,10 +151,10 @@ def process_and_append(image, history):
         return history + error_html if history else error_html, history if history else ""
     
     # 이미지가 있는 경우 기존 로직 실행
-    new_result = get_nutritional_info(image)
+    result = food_processor.get_nutritional_info(image)
     
     # get_nutritional_info 결과 검증
-    if not new_result or 'food_info' not in new_result:
+    if not result or 'food_info' not in result:
         error_html = f"""
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
              background-color: #FFEBEE; overflow: hidden;">
@@ -157,12 +169,12 @@ def process_and_append(image, history):
     if not history:
         # Initialize totals
         totals = {
-            'calories': extract_number(new_result['food_info']['calories']),
-            'water': extract_number(new_result['food_info']['water']),
-            'protein': extract_number(new_result['food_info']['protein']),
-            'fat': extract_number(new_result['food_info']['fat']),
-            'carbohydrates': extract_number(new_result['food_info']['carbohydrates']),
-            'sugar': extract_number(new_result['food_info']['sugar'])
+            'calories': extract_number(result['food_info']['calories']),
+            'water': extract_number(result['food_info']['water']),
+            'protein': extract_number(result['food_info']['protein']),
+            'fat': extract_number(result['food_info']['fat']),
+            'carbohydrates': extract_number(result['food_info']['carbohydrates']),
+            'sugar': extract_number(result['food_info']['sugar'])
         }
         
         # Create initial HTML with all sections
@@ -170,7 +182,7 @@ def process_and_append(image, history):
         <div id="today-nutrition" style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
             <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘의 식단</h3>
             <div class="food-cards" style="overflow-x: auto;">
-                {create_food_card(new_result['food_info'], new_result['confidence'])}
+                {create_food_card(result['food_info'], result['confidence'])}
             </div>
         </div>
         <div id="nutrition-summary">
@@ -184,12 +196,12 @@ def process_and_append(image, history):
         # Parse previous totals and update
         prev_totals = extract_totals_from_html(history)
         totals = {
-            'calories': prev_totals['calories'] + extract_number(new_result['food_info']['calories']),
-            'water': prev_totals['water'] + extract_number(new_result['food_info']['water']),
-            'protein': prev_totals['protein'] + extract_number(new_result['food_info']['protein']),
-            'fat': prev_totals['fat'] + extract_number(new_result['food_info']['fat']),
-            'carbohydrates': prev_totals['carbohydrates'] + extract_number(new_result['food_info']['carbohydrates']),
-            'sugar': prev_totals['sugar'] + extract_number(new_result['food_info']['sugar'])
+            'calories': prev_totals['calories'] + extract_number(result['food_info']['calories']),
+            'water': prev_totals['water'] + extract_number(result['food_info']['water']),
+            'protein': prev_totals['protein'] + extract_number(result['food_info']['protein']),
+            'fat': prev_totals['fat'] + extract_number(result['food_info']['fat']),
+            'carbohydrates': prev_totals['carbohydrates'] + extract_number(result['food_info']['carbohydrates']),
+            'sugar': prev_totals['sugar'] + extract_number(result['food_info']['sugar'])
         }
         
         # Split HTML into sections using unique IDs
@@ -205,7 +217,7 @@ def process_and_append(image, history):
             # Insert new card before the last </div> of food-cards
             today_nutrition = (
                 today_nutrition[:card_insert_point] +
-                create_food_card(new_result['food_info'], new_result['confidence']) +
+                create_food_card(result['food_info'], result['confidence']) +
                 today_nutrition[card_insert_point:]
             )
         
@@ -330,7 +342,7 @@ def get_recommended_daily_values():
 
 def create_interfaces():
     customer_info_interface = gr.Interface(
-        fn=get_customer_info,
+        fn=get_customer_details,
         inputs=gr.Textbox(label="Customer Code"),
         outputs=[
             gr.Image(label="Customer Photo", width=300, height=300),  # Display customer photo
@@ -407,3 +419,14 @@ def create_interfaces():
         )
 
     return customer_info_interface, nutritional_info_interface
+
+def get_customer_details(customer_code):
+    """Get customer details and create visualization"""
+    # customer_processor.get_customer_info는 4개의 값을 반환함:
+    # photo, customer_info_text, nutrition_summary, nutrition_plot
+    photo, info_text, nutrition_summary, plot = customer_processor.get_customer_info(customer_code)
+    
+    if photo is None:  # 에러가 발생한 경우
+        return None, info_text, None, None  # 에러 메시지는 info_text에 포함됨
+    
+    return photo, info_text, nutrition_summary, plot

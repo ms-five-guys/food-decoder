@@ -1,54 +1,63 @@
-import sys
 import os
-import io
-
-# Add the parent directory to the system path
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.append(parent_dir)
-
+import sys
 import cv2
 import numpy as np
 import requests
 import matplotlib.pyplot as plt
-from clients.ml_client import MLClient
-from clients.db_client import DatabaseClient
 
+# Add the parent directory to the system path
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.append(parent_dir)
+
+from clients.db_client import DatabaseClient
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
-# Initialize the ML client
-ml_client = MLClient()
-
-# Initialize the database client
-db_client = DatabaseClient(
-    host='azure-mysql-host',  # Azure MySQL host
-    user='username',          # MySQL username
-    password='password',      # MySQL password
-    database='database-name'  # database name
-)
-
-def get_customer_info(customer_code):
-    """
-    Get customer information from the database using the customer code.
-    """
-    if not customer_code:
-        return None, "Please enter a customer code.", None, None
+class CustomerProcessor:
+    def __init__(self, db_client=None):
+        self.db_client = db_client or DatabaseClient(
+            host='azure-mysql-host',
+            user='username',
+            password='password',
+            database='database-name'
+        )
     
-    try:
-        # Connect to the database
-        db_client.connect()
+    def get_customer_info(self, customer_code):
+        """Get customer information and visualize nutrition history"""
+        if not customer_code:
+            return None, "Please enter a customer code.", None, None
         
-        # Query the database for customer information
-        customer_info = db_client.get_customer_info(customer_code)
-        
-        # Close the database connection
-        db_client.close()
-        
-        if not customer_info:
-            return None, "No customer information found for the given code.", None, None
-        
+        try:
+            self.db_client.connect()
+            customer_info = self.db_client.get_customer_info(customer_code)
+            self.db_client.close()
+            
+            if not customer_info:
+                return None, "No customer information found.", None, None
+            
+            # Process customer photo
+            photo = self._process_customer_photo(customer_info['basic_info']['photo_url'])
+            
+            # Create visualizations
+            nutrition_text, nutrition_summary = self._create_nutrition_text(customer_info)
+            nutrition_plot = self._create_nutrition_plot(customer_info)
+            
+            return photo, nutrition_text, nutrition_summary, nutrition_plot
+            
+        except Exception as e:
+            return None, f"Error: {str(e)}", None, None
+    
+    def _process_customer_photo(self, photo_url):
+        """Process and resize customer photo"""
+        response = requests.get(photo_url)
+        image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        return cv2.resize(image, (300, 300))
+    
+    def _create_nutrition_text(self, customer_info):
+        """Create formatted nutrition text"""
         # Format the customer info with HTML and CSS
         customer_info_text = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
-        customer_info_text += "<strong>Customer Information</strong><br><br>"  # Add label as HTML
+        customer_info_text += "<strong>Customer Information</strong><br><br>"
         customer_info_text += "<table style='width:100%;'>"
         customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['basic_info']['name']}</td></tr>"
         customer_info_text += f"<tr><td><strong>생년월일</strong></td><td>{customer_info['basic_info'].get('id_number', 'N/A')}</td></tr>"
@@ -61,7 +70,7 @@ def get_customer_info(customer_code):
         
         # Create a text summary of recent nutrition with colored text
         nutrition_summary = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
-        nutrition_summary += "<strong>Recent Nutrition Summary</strong><br><br>"  # Add label as HTML
+        nutrition_summary += "<strong>Recent Nutrition Summary</strong><br><br>"
         nutrition_summary += "<br>".join(
             f"날짜: <span style='color:blue;'>{nutrition['date']}</span><br>"
             f"  - 칼로리: <span style='color:red;'>{nutrition['total_calories']} kcal</span><br>"
@@ -74,7 +83,11 @@ def get_customer_info(customer_code):
         )
         nutrition_summary += "</div>"
         
-        # Create a plot for recent nutrition
+        return customer_info_text, nutrition_summary
+    
+    def _create_nutrition_plot(self, customer_info):
+        """Create nutrition history plot"""
+        # Extract data for plotting
         dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
         calories = [nutrition['total_calories'] for nutrition in customer_info['recent_nutrition']]
         water = [nutrition['total_water'] for nutrition in customer_info['recent_nutrition']]
@@ -129,73 +142,4 @@ def get_customer_info(customer_code):
         axs[2, 1].tick_params(axis='x', rotation=45)
 
         plt.tight_layout()
-
-        # Load the image from the URL
-        image_url = customer_info['basic_info']['photo_url']
-        response = requests.get(image_url)
-        image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
-        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-
-        # Resize the image to the desired size
-        resized_image = cv2.resize(image, (300, 300))  # Resize to 300x300 pixels
-
-        return resized_image, customer_info_text, nutrition_summary, fig
-        
-    except Exception as e:
-        return None, f"Error retrieving customer information: {str(e)}", None, None
-
-def get_nutritional_info(image):
-    """
-    Process a single image and get nutritional information.
-    
-    Args:
-        image: PIL.Image object
-        
-    Returns:
-        dict: Contains food information, confidence score, and any error messages
-    """
-    if image is None:
-        return {
-            'error': "No image captured",
-            'food_info': None,
-            'confidence': 0
-        }
-    
-    try:
-        # Convert PIL image to bytes
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG')
-        img_bytes = img_byte_arr.getvalue()
-        
-        # Get food prediction from Custom Vision Server
-        food_name, confidence = ml_client.get_food_prediction(img_bytes)
-        
-        # Connect to the database
-        db_client.connect()
-        
-        # Query the database for food information
-        food_info = db_client.get_food_info_from_db(food_name)
-        
-        # Close the database connection
-        db_client.close()
-        
-        if not food_info:
-            return {
-                'error': f"No nutritional information found for {food_name}.",
-                'food_info': None,
-                'confidence': confidence
-            }
-        
-        # Return the food information and confidence as a dictionary
-        return {
-            'error': None,
-            'food_info': food_info,
-            'confidence': confidence
-        }
-        
-    except Exception as e:
-        return {
-            'error': f"Error processing image: {str(e)}",
-            'food_info': None,
-            'confidence': 0
-        }
+        return fig 
