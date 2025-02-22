@@ -1,6 +1,7 @@
 import gradio as gr
 from unittest.mock import patch  # TODO(GideokKim): Remove this import when ML server is ready
-from components.ui_components import create_interfaces
+from components.create_interfaces import create_interfaces
+from datetime import datetime # TODO(GideokKim): Remove this import when ML server is ready
 
 # Create Gradio interfaces
 customer_info_interface, nutritional_info_interface = create_interfaces()
@@ -34,15 +35,18 @@ if __name__ == "__main__":
                  {"date": "2025-02-14", "total_calories": 2100, "total_water": 540, "total_protein": 88, "total_fat": 78, "total_carbohydrates": 240, "total_sugar": 58},
                  {"date": "2025-02-15", "total_calories": 1900, "total_water": 520, "total_protein": 82, "total_fat": 72, "total_carbohydrates": 220, "total_sugar": 52}
              ]
-         }), patch('clients.db_client.DatabaseClient.get_food_info_from_db', return_value={
-             "food_name": "김치찌개",
+         }), \
+         patch('clients.db_client.DatabaseClient.get_food_info_from_db', return_value={
+             "name": "김치찌개",
              "calories": "180kcal",
              "water": "50g",
              "protein": "12g",
              "fat": "8g",
              "carbohydrates": "15g",
-             "sugar": "3g"
-         }):
+             "sugar": "3g",
+             "created_at": datetime(2024, 2, 15, 12, 30, 0)  # DB의 created_at 컬럼 값
+         }), \
+         patch('clients.ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.5)):
         demo.launch(
             server_name="0.0.0.0",  # Allow external connections
             server_port=7860,       # Specify port

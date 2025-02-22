@@ -1,0 +1,159 @@
+import re
+
+def extract_number(value):
+    """
+    extract numbers from string and convert to float
+    example: '180kcal' -> 180.0
+    """
+    if isinstance(value, (int, float)):
+        return float(value)
+    match = re.search(r'(\d+\.?\d*)', str(value))
+    return float(match.group(1)) if match else 0.0
+
+def get_recommended_daily_values():
+    """
+    return daily recommended intake
+    based on 2020 Korean Dietary Reference Intakes for Koreans
+    adult male standard (19-29 years old)
+    """
+    return {
+        'calories': 2600,     # kcal
+        'water': 2500,        # ml
+        'protein': 65,        # g
+        'fat': 65,           # g (총 에너지의 약 20-25%)
+        'carbohydrates': 360, # g (총 에너지의 약 55-65%)
+        'sugar': 50          # g (총 에너지의 10% 이내)
+    }
+
+def create_food_card(food_info, confidence):
+    """
+    Create a card for food information
+    """
+    # 섭취 시간 포맷팅
+    consumption_time = food_info['created_at'].strftime("%Y-%m-%d %H:%M")
+    
+    return f"""
+    <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="font-size: 1.1em; font-weight: bold;">{food_info['name']}</div>
+            <div style="font-size: 0.9em; color: #666;">신뢰도: {confidence:.1f}%</div>
+        </div>
+        <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">섭취 시간: {consumption_time}</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
+            <div>
+                <div style="font-size: 0.75em; color: #666;">에너지</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['calories']}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">수분</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['water']}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">단백질</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['protein']}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">지방</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['fat']}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">탄수화물</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['carbohydrates']}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">당류</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['sugar']}</div>
+            </div>
+        </div>
+    </div>
+    """
+
+def create_warning_section(totals):
+    """
+    create warning section for nutritional components intake
+    """
+    recommended = get_recommended_daily_values()
+    warnings = []
+    
+    # calculate intake percentage for each nutritional component and check if it exceeds 100%
+    percentages = {
+        '에너지': (totals['calories'] / recommended['calories']) * 100,
+        '수분': (totals['water'] / recommended['water']) * 100,
+        '단백질': (totals['protein'] / recommended['protein']) * 100,
+        '지방': (totals['fat'] / recommended['fat']) * 100,
+        '탄수화물': (totals['carbohydrates'] / recommended['carbohydrates']) * 100,
+        '당류': (totals['sugar'] / recommended['sugar']) * 100
+    }
+    
+    # collect over items 100%
+    over_items = [f"{name}({int(pct)}%)" for name, pct in percentages.items() if pct > 100]
+    
+    if not over_items:
+        return ""  # if no over items, return empty string
+    
+    warning_text = ", ".join(over_items) + " 항목에서 권장섭취량을 초과했습니다."
+    
+    return f"""
+    <div style="padding: 15px; border-radius: 15px; border: 1px solid #FFB74D; margin-bottom: 20px; 
+         background-color: #FFF3E0; overflow: hidden;">
+        <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #F57C00;">⚠️ 섭취량 경고</h3>
+        <div style="font-size: 0.9em; color: #E65100;">
+            {warning_text}
+        </div>
+    </div>
+    """
+
+def create_summary_section(totals):
+    """
+    create summary section for nutritional components
+    """
+    recommended = get_recommended_daily_values()
+    
+    return f"""
+    <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
+        <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">📊 하루 권장 영양성분 총계</h3>
+        <div style="display: grid; grid-template-columns: 1fr 3fr 1fr; gap: 10px; align-items: center;">
+            <div style="font-size: 0.9em; color: #666;">에너지</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['calories'] / recommended['calories']) * 100}%; height: 100%; 
+                     background-color: #4CAF50; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['calories'] / recommended['calories']) * 100)}%</div>
+
+            <div style="font-size: 0.9em; color: #666;">수분</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['water'] / recommended['water']) * 100}%; height: 100%; 
+                     background-color: #2196F3; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['water'] / recommended['water']) * 100)}%</div>
+
+            <div style="font-size: 0.9em; color: #666;">단백질</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['protein'] / recommended['protein']) * 100}%; height: 100%; 
+                     background-color: #FF9800; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['protein'] / recommended['protein']) * 100)}%</div>
+
+            <div style="font-size: 0.9em; color: #666;">지방</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['fat'] / recommended['fat']) * 100}%; height: 100%; 
+                     background-color: #E91E63; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['fat'] / recommended['fat']) * 100)}%</div>
+
+            <div style="font-size: 0.9em; color: #666;">탄수화물</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['carbohydrates'] / recommended['carbohydrates']) * 100}%; height: 100%; 
+                     background-color: #9C27B0; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['carbohydrates'] / recommended['carbohydrates']) * 100)}%</div>
+
+            <div style="font-size: 0.9em; color: #666;">당류</div>
+            <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
+                <div style="width: {(totals['sugar'] / recommended['sugar']) * 100}%; height: 100%; 
+                     background-color: #FF5722; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['sugar'] / recommended['sugar']) * 100)}%</div>
+        </div>
+    </div>
+    """ 
