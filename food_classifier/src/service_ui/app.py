@@ -31,10 +31,18 @@ if __name__ == "__main__":
              "recent_nutrition": [
                  {"date": "2025-02-11", "total_calories": 1800, "total_water": 500, "total_protein": 80, "total_fat": 70, "total_carbohydrates": 200, "total_sugar": 50},
                  {"date": "2025-02-12", "total_calories": 2200, "total_water": 550, "total_protein": 90, "total_fat": 80, "total_carbohydrates": 250, "total_sugar": 60},
-                 {"date": "2025-02-13", "total_calories": 2000, "total_water": 530, "total_protein": 85, "total_fat": 75, "total_carbohydrates": 230, "total_sugar": 55},
+                 {"date": "2025-02-13", "total_calories": 2000, "total_water": 530, "total_protein": 85, "total_fat": 115, "total_carbohydrates": 230, "total_sugar": 55},
                  {"date": "2025-02-14", "total_calories": 2100, "total_water": 540, "total_protein": 88, "total_fat": 78, "total_carbohydrates": 240, "total_sugar": 58},
                  {"date": "2025-02-15", "total_calories": 1900, "total_water": 520, "total_protein": 82, "total_fat": 72, "total_carbohydrates": 220, "total_sugar": 52}
-             ]
+             ],
+             "recommended_nutrition": {
+                 "calories": {"min": 1800, "max": 2200},
+                 "water": {"min": 500, "max": 600},
+                 "protein": {"min": 75, "max": 95},
+                 "fat": {"min": 65, "max": 85},
+                 "carbohydrates": {"min": 200, "max": 260},
+                 "sugar": {"min": 45, "max": 65}
+             }
          }), \
          patch('clients.db_client.DatabaseClient.get_food_info_from_db', return_value={
              "name": "김치찌개",

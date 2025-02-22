@@ -80,37 +80,67 @@ class CustomerProcessor:
         dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
         
         plot_configs = [
-            {'data': 'total_calories', 'title': 'Calories', 'color': '#FF6B6B', 'ylabel': 'kcal'},
-            {'data': 'total_water', 'title': 'Water', 'color': '#45B7D1', 'ylabel': 'g'},
-            {'data': 'total_protein', 'title': 'Protein', 'color': '#96E072', 'ylabel': 'g'},
-            {'data': 'total_fat', 'title': 'Fat', 'color': '#E8A2FF', 'ylabel': 'g'},
-            {'data': 'total_carbohydrates', 'title': 'Carbohydrates', 'color': '#FFD93D', 'ylabel': 'g'},
-            {'data': 'total_sugar', 'title': 'Sugar', 'color': '#FF8B94', 'ylabel': 'g'}
+            {'data': 'total_calories', 'title': 'Calories', 'color': '#FF6B6B', 'ylabel': 'kcal', 'rec_key': 'calories'},
+            {'data': 'total_water', 'title': 'Water', 'color': '#45B7D1', 'ylabel': 'g', 'rec_key': 'water'},
+            {'data': 'total_protein', 'title': 'Protein', 'color': '#96E072', 'ylabel': 'g', 'rec_key': 'protein'},
+            {'data': 'total_fat', 'title': 'Fat', 'color': '#E8A2FF', 'ylabel': 'g', 'rec_key': 'fat'},
+            {'data': 'total_carbohydrates', 'title': 'Carbohydrates', 'color': '#FFD93D', 'ylabel': 'g', 'rec_key': 'carbohydrates'},
+            {'data': 'total_sugar', 'title': 'Sugar', 'color': '#FF8B94', 'ylabel': 'g', 'rec_key': 'sugar'}
         ]
         
-        # Create figure with subplots
         fig, axs = plt.subplots(len(plot_configs), 1, figsize=(10, 24))
         plt.rcParams['font.size'] = 14
 
-        # Create each plot
         for idx, config in enumerate(plot_configs):
-            # Extract data for current nutrient
             values = [nutrition[config['data']] for nutrition in customer_info['recent_nutrition']]
+            rec_range = customer_info['recommended_nutrition'][config['rec_key']]
+            min_val, max_val = rec_range['min'], rec_range['max']
             
-            # Create plot
-            axs[idx].plot(dates, values, 
-                         marker='o', 
-                         label=f"{config['title']} ({config['ylabel']})", 
-                         color=config['color'], 
-                         linewidth=2, 
-                         markersize=8)
+            line = axs[idx].plot(dates, values, 
+                               color=config['color'],
+                               linewidth=2,
+                               label=f"{config['title']} ({config['ylabel']})")
             
-            # Set labels and title
+            axs[idx].scatter(dates, values, 
+                            color=config['color'],
+                            s=64)
+            
+            for date, value in zip(dates, values):
+                if value < min_val:
+                    axs[idx].scatter(date, value, 
+                                   color='#FF4444',
+                                   s=100,
+                                   zorder=5)
+                    axs[idx].annotate(f'{value}', 
+                                    xy=(date, value),
+                                    xytext=(5, 5),
+                                    textcoords='offset points',
+                                    color='#FF4444',
+                                    fontweight='bold')
+                elif value > max_val:
+                    axs[idx].scatter(date, value, 
+                                   color='#FFA500',
+                                   s=100,
+                                   zorder=5)
+                    axs[idx].annotate(f'{value}', 
+                                    xy=(date, value),
+                                    xytext=(5, 5),
+                                    textcoords='offset points',
+                                    color='#FFA500',
+                                    fontweight='bold')
+
+            axs[idx].axhline(y=min_val, color='#666666', linestyle='--', alpha=0.5)
+            axs[idx].axhline(y=max_val, color='#666666', linestyle='--', alpha=0.5)
+            axs[idx].fill_between(dates, min_val, max_val,
+                                color='#FFFFFF', alpha=0.1,
+                                label=f'Recommended ({min_val}-{max_val})')
+            
             axs[idx].set_title(config['title'], fontsize=16, pad=15)
             axs[idx].set_xlabel('Date', fontsize=14)
             axs[idx].set_ylabel(config['ylabel'], fontsize=14)
             axs[idx].tick_params(axis='both', labelsize=12)
             axs[idx].tick_params(axis='x', rotation=45)
+            axs[idx].legend(fontsize=12)
 
         plt.tight_layout(pad=4.0)
         return fig 
