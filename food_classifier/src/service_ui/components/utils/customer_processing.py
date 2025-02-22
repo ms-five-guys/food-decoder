@@ -21,18 +21,23 @@ class CustomerProcessor:
             database='database-name'
         )
     
-    def get_customer_info(self, customer_code):
+    def get_customer_info(self, customer_code, guardian_code):
         """Get customer information and visualize nutrition history"""
-        if not customer_code:
-            return None, "Please enter a customer code.", None, None
+        if not customer_code or not guardian_code:
+            return None, "고객 코드 또는 보호자 코드를 확인해주세요.", None, None
         
         try:
             self.db_client.connect()
-            customer_info = self.db_client.get_customer_info(customer_code)
+            
+            # 고객 코드와 보호자 코드를 합쳐서 하나의 코드로 생성
+            combined_code = f"{customer_code}-{guardian_code}"
+            
+            # 고객 정보 조회 (combined_code 사용)
+            customer_info = self.db_client.get_customer_info(combined_code)
             self.db_client.close()
             
             if not customer_info:
-                return None, "No customer information found.", None, None
+                return None, "고객 정보를 찾을 수 없습니다.", None, None
             
             # Process customer photo
             photo = self._process_customer_photo(customer_info['basic_info']['photo_url'])
@@ -44,7 +49,7 @@ class CustomerProcessor:
             return photo, nutrition_text, nutrition_summary, nutrition_plot
             
         except Exception as e:
-            return None, f"Error: {str(e)}", None, None
+            return None, f"오류가 발생했습니다: {str(e)}", None, None
     
     def _process_customer_photo(self, photo_url):
         """Process and resize customer photo"""

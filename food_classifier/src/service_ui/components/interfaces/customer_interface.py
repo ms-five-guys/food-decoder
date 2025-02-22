@@ -11,14 +11,18 @@ from utils.customer_processing import CustomerProcessor
 # Initialize processor
 customer_processor = CustomerProcessor()
 
-def get_customer_details(customer_code):
+def get_customer_details(customer_code, guardian_code):
     """Get customer details and create visualization"""
-    # customer_processor.get_customer_info는 4개의 값을 반환함:
-    # photo, customer_info_text, nutrition_summary, nutrition_plot
-    photo, info_text, nutrition_summary, plot = customer_processor.get_customer_info(customer_code)
+    # 입력값 검증
+    if not customer_code or not guardian_code:
+        gr.Warning("고객 코드 또는 보호자 코드를 확인해주세요.")
+        return None, "", None, None
+    
+    photo, info_text, nutrition_summary, plot = customer_processor.get_customer_info(customer_code, guardian_code)
     
     if photo is None:  # 에러가 발생한 경우
-        return None, info_text, None, None  # 에러 메시지는 info_text에 포함됨
+        gr.Error(info_text)  # 에러 메시지를 팝업으로 표시
+        return None, "", None, None
     
     return photo, info_text, nutrition_summary, plot
 
@@ -26,7 +30,10 @@ def create_customer_interface():
     """Create customer information interface"""
     customer_info_interface = gr.Interface(
         fn=get_customer_details,
-        inputs=gr.Textbox(label="고객 코드"),
+        inputs=[
+            gr.Textbox(label="고객 코드"),
+            gr.Textbox(label="보호자 코드", type="password")
+        ],
         outputs=[
             gr.Image(label="고객 사진", width=300, height=300),
             gr.HTML(label="고객 상세 정보"),
