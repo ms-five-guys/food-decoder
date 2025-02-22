@@ -43,10 +43,10 @@ class CustomerProcessor:
             photo = self._process_customer_photo(customer_info['basic_info']['photo_url'])
             
             # Create visualizations
-            nutrition_text, nutrition_summary = self._create_nutrition_text(customer_info)
+            customer_detail_text = self._create_customer_detail_text(customer_info)
             nutrition_plot = self._create_nutrition_plot(customer_info)
             
-            return photo, nutrition_text, nutrition_summary, nutrition_plot
+            return photo, customer_detail_text, nutrition_plot
             
         except Exception as e:
             return None, f"오류가 발생했습니다: {str(e)}", None, None
@@ -58,8 +58,8 @@ class CustomerProcessor:
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         return cv2.resize(image, (300, 300))
     
-    def _create_nutrition_text(self, customer_info):
-        """Create formatted nutrition text"""
+    def _create_customer_detail_text(self, customer_info):
+        """Create formatted customer detail text"""
         # Format the customer info with HTML and CSS
         customer_info_text = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
         customer_info_text += "<strong>고객 상세 정보</strong><br><br>"
@@ -73,78 +73,44 @@ class CustomerProcessor:
         customer_info_text += "</table>"
         customer_info_text += "</div>"
         
-        # Create a text summary of recent nutrition with colored text
-        nutrition_summary = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
-        nutrition_summary += "<strong>최근 영양 섭취 정보</strong><br><br>"
-        nutrition_summary += "<br>".join(
-            f"날짜: <span style='color:blue;'>{nutrition['date']}</span><br>"
-            f"  - 칼로리: <span style='color:red;'>{nutrition['total_calories']} kcal</span><br>"
-            f"  - 수분: <span style='color:green;'>{nutrition['total_water']}g</span><br>"
-            f"  - 단백질: <span style='color:orange;'>{nutrition['total_protein']}g</span><br>"
-            f"  - 지방: <span style='color:purple;'>{nutrition['total_fat']}g</span><br>"
-            f"  - 탄수화물: <span style='color:brown;'>{nutrition['total_carbohydrates']}g</span><br>"
-            f"  - 당류: <span style='color:pink;'>{nutrition['total_sugar']}g</span><br>"
-            for nutrition in customer_info['recent_nutrition']
-        )
-        nutrition_summary += "</div>"
-        
-        return customer_info_text, nutrition_summary
+        return customer_info_text
     
     def _create_nutrition_plot(self, customer_info):
-        """Create nutrition history plot"""
-        # Extract data for plotting
+        """Create nutrition history plot in a single vertical column"""
         dates = [nutrition['date'] for nutrition in customer_info['recent_nutrition']]
-        calories = [nutrition['total_calories'] for nutrition in customer_info['recent_nutrition']]
-        water = [nutrition['total_water'] for nutrition in customer_info['recent_nutrition']]
-        protein = [nutrition['total_protein'] for nutrition in customer_info['recent_nutrition']]
-        fat = [nutrition['total_fat'] for nutrition in customer_info['recent_nutrition']]
-        carbohydrates = [nutrition['total_carbohydrates'] for nutrition in customer_info['recent_nutrition']]
-        sugar = [nutrition['total_sugar'] for nutrition in customer_info['recent_nutrition']]
         
-        # Create separate plots for each nutritional component
-        fig, axs = plt.subplots(3, 2, figsize=(12, 10))  # 3 rows, 2 columns
+        plot_configs = [
+            {'data': 'total_calories', 'title': 'Calories', 'color': '#FF6B6B', 'ylabel': 'kcal'},
+            {'data': 'total_water', 'title': 'Water', 'color': '#45B7D1', 'ylabel': 'g'},
+            {'data': 'total_protein', 'title': 'Protein', 'color': '#96E072', 'ylabel': 'g'},
+            {'data': 'total_fat', 'title': 'Fat', 'color': '#E8A2FF', 'ylabel': 'g'},
+            {'data': 'total_carbohydrates', 'title': 'Carbohydrates', 'color': '#FFD93D', 'ylabel': 'g'},
+            {'data': 'total_sugar', 'title': 'Sugar', 'color': '#FF8B94', 'ylabel': 'g'}
+        ]
+        
+        # Create figure with subplots
+        fig, axs = plt.subplots(len(plot_configs), 1, figsize=(10, 24))
+        plt.rcParams['font.size'] = 14
 
-        # Plot Calories
-        axs[0, 0].plot(dates, calories, marker='o', label='Calories (kcal)', color='r')
-        axs[0, 0].set_title('Calories')
-        axs[0, 0].set_xlabel('Date')
-        axs[0, 0].set_ylabel('kcal')
-        axs[0, 0].tick_params(axis='x', rotation=45)
+        # Create each plot
+        for idx, config in enumerate(plot_configs):
+            # Extract data for current nutrient
+            values = [nutrition[config['data']] for nutrition in customer_info['recent_nutrition']]
+            
+            # Create plot
+            axs[idx].plot(dates, values, 
+                         marker='o', 
+                         label=f"{config['title']} ({config['ylabel']})", 
+                         color=config['color'], 
+                         linewidth=2, 
+                         markersize=8)
+            
+            # Set labels and title
+            axs[idx].set_title(config['title'], fontsize=16, pad=15)
+            axs[idx].set_xlabel('Date', fontsize=14)
+            axs[idx].set_ylabel(config['ylabel'], fontsize=14)
+            axs[idx].tick_params(axis='both', labelsize=12)
+            axs[idx].tick_params(axis='x', rotation=45)
 
-        # Plot Water
-        axs[0, 1].plot(dates, water, marker='o', label='Water (g)', color='b')
-        axs[0, 1].set_title('Water')
-        axs[0, 1].set_xlabel('Date')
-        axs[0, 1].set_ylabel('g')
-        axs[0, 1].tick_params(axis='x', rotation=45)
-
-        # Plot Protein
-        axs[1, 0].plot(dates, protein, marker='o', label='Protein (g)', color='g')
-        axs[1, 0].set_title('Protein')
-        axs[1, 0].set_xlabel('Date')
-        axs[1, 0].set_ylabel('g')
-        axs[1, 0].tick_params(axis='x', rotation=45)
-
-        # Plot Fat
-        axs[1, 1].plot(dates, fat, marker='o', label='Fat (g)', color='m')
-        axs[1, 1].set_title('Fat')
-        axs[1, 1].set_xlabel('Date')
-        axs[1, 1].set_ylabel('g')
-        axs[1, 1].tick_params(axis='x', rotation=45)
-
-        # Plot Carbohydrates
-        axs[2, 0].plot(dates, carbohydrates, marker='o', label='Carbohydrates (g)', color='c')
-        axs[2, 0].set_title('Carbohydrates')
-        axs[2, 0].set_xlabel('Date')
-        axs[2, 0].set_ylabel('g')
-        axs[2, 0].tick_params(axis='x', rotation=45)
-
-        # Plot Sugar
-        axs[2, 1].plot(dates, sugar, marker='o', label='Sugar (g)', color='y')
-        axs[2, 1].set_title('Sugar')
-        axs[2, 1].set_xlabel('Date')
-        axs[2, 1].set_ylabel('g')
-        axs[2, 1].tick_params(axis='x', rotation=45)
-
-        plt.tight_layout()
+        plt.tight_layout(pad=4.0)
         return fig 

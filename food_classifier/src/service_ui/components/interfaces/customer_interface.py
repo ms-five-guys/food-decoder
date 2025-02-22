@@ -18,13 +18,13 @@ def get_customer_details(customer_code, guardian_code):
         gr.Warning("고객 코드 또는 보호자 코드를 확인해주세요.")
         return None, "", None, None
     
-    photo, info_text, nutrition_summary, plot = customer_processor.get_customer_info(customer_code, guardian_code)
+    photo, info_text, plot = customer_processor.get_customer_info(customer_code, guardian_code)
     
-    if photo is None:  # 에러가 발생한 경우
-        gr.Error(info_text)  # 에러 메시지를 팝업으로 표시
+    if photo is None:
+        gr.Error(info_text)
         return None, "", None, None
     
-    return photo, info_text, nutrition_summary, plot
+    return photo, info_text, plot
 
 def create_customer_interface():
     """Create customer information interface"""
@@ -37,11 +37,10 @@ def create_customer_interface():
         outputs=[
             gr.Image(label="고객 사진", width=300, height=300),
             gr.HTML(label="고객 상세 정보"),
-            gr.HTML(label="최근 섭취 정보"),
             gr.Plot(label=" ")
         ],
         title="📱 고객 정보",
-        description="고객 코드와 보호자 코드를 입력하여 고객의 상세 정보를 확인하세요.",
+        description="🔍 고객 코드와 보호자 코드를 입력하여 고객의 상세 정보를 확인하세요.",
         theme="default"
     )
     return customer_info_interface 
