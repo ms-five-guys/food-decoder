@@ -57,7 +57,7 @@ class CustomerProcessor:
         """Create formatted nutrition text"""
         # Format the customer info with HTML and CSS
         customer_info_text = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
-        customer_info_text += "<strong>Customer Information</strong><br><br>"
+        customer_info_text += "<strong>고객 상세 정보</strong><br><br>"
         customer_info_text += "<table style='width:100%;'>"
         customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['basic_info']['name']}</td></tr>"
         customer_info_text += f"<tr><td><strong>생년월일</strong></td><td>{customer_info['basic_info'].get('id_number', 'N/A')}</td></tr>"
@@ -70,7 +70,7 @@ class CustomerProcessor:
         
         # Create a text summary of recent nutrition with colored text
         nutrition_summary = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
-        nutrition_summary += "<strong>Recent Nutrition Summary</strong><br><br>"
+        nutrition_summary += "<strong>최근 영양 섭취 정보</strong><br><br>"
         nutrition_summary += "<br>".join(
             f"날짜: <span style='color:blue;'>{nutrition['date']}</span><br>"
             f"  - 칼로리: <span style='color:red;'>{nutrition['total_calories']} kcal</span><br>"

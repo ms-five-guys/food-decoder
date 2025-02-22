@@ -26,15 +26,15 @@ def create_customer_interface():
     """Create customer information interface"""
     customer_info_interface = gr.Interface(
         fn=get_customer_details,
-        inputs=gr.Textbox(label="Customer Code"),
+        inputs=gr.Textbox(label="고객 코드"),
         outputs=[
-            gr.Image(label="Customer Photo", width=300, height=300),  # Display customer photo
-            gr.HTML(label="Customer Information"),  # Display customer information
-            gr.HTML(label="Recent Nutrition Summary"),  # Display recent nutrition summary
-            gr.Plot(label=" ")  # Display recent nutrition graph
+            gr.Image(label="고객 사진", width=300, height=300),
+            gr.HTML(label="고객 상세 정보"),
+            gr.HTML(label="최근 섭취 정보"),
+            gr.Plot(label=" ")
         ],
-        title="📱 Customer Information",
-        description="Enter customer code to get customer information",
+        title="📱 고객 정보",
+        description="고객 코드와 보호자 코드를 입력하여 고객의 상세 정보를 확인하세요.",
         theme="default"
     )
     return customer_info_interface 
