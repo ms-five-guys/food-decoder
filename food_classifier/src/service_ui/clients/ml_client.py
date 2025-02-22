@@ -8,11 +8,7 @@ class MLClient:
         """
         Initialize the ML client with Azure Custom Vision configuration.
         """
-        current_dir = Path(__file__).resolve().parent
-        
-        # Construct path to .env file (2 levels up + etc directory)
-        env_path = current_dir.parent.parent.parent / 'etc' / 'food-classifier' / '.env'
-    
+        env_path = Path('/etc/food-classifier/.env')
         
         with open(env_path, 'r') as f:
             for line in f:
