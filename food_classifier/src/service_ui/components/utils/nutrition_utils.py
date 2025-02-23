@@ -22,7 +22,9 @@ def get_recommended_daily_values():
         'protein': 65,        # g
         'fat': 65,           # g (총 에너지의 약 20-25%)
         'carbohydrates': 360, # g (총 에너지의 약 55-65%)
-        'sugar': 50          # g (총 에너지의 10% 이내)
+        'sugar': 50,          # g (총 에너지의 10% 이내)
+        'fiber': 25,          # g
+        'sodium': 2300        # mg
     }
 
 def create_food_card(food_info, confidence):
@@ -78,11 +80,11 @@ def create_warning_section(totals):
     # calculate intake percentage for each nutritional component and check if it exceeds 100%
     percentages = {
         '에너지': (totals['calories'] / recommended['calories']) * 100,
-        '수분': (totals['water'] / recommended['water']) * 100,
+        '탄수화물': (totals['carbohydrates'] / recommended['carbohydrates']) * 100,
         '단백질': (totals['protein'] / recommended['protein']) * 100,
         '지방': (totals['fat'] / recommended['fat']) * 100,
-        '탄수화물': (totals['carbohydrates'] / recommended['carbohydrates']) * 100,
-        '당류': (totals['sugar'] / recommended['sugar']) * 100
+        '식이섬유': (totals['fiber'] / recommended['fiber']) * 100,
+        '나트륨': (totals['sodium'] / recommended['sodium']) * 100
     }
     
     # collect over items 100%
