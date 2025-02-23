@@ -35,34 +35,34 @@ def create_food_card(food_info, confidence):
     return f"""
     <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="font-size: 1.1em; font-weight: bold;">{food_info['name']}</div>
+            <div style="font-size: 1.1em; font-weight: bold;">{food_info.get('food_name', '알 수 없음')}</div>
             <div style="font-size: 0.9em; color: #666;">신뢰도: {confidence:.1f}%</div>
         </div>
         <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">섭취 시간: {consumption_time}</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
             <div>
                 <div style="font-size: 0.75em; color: #666;">에너지</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['calories']}</div>
-            </div>
-            <div>
-                <div style="font-size: 0.75em; color: #666;">수분</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['water']}</div>
-            </div>
-            <div>
-                <div style="font-size: 0.75em; color: #666;">단백질</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['protein']}</div>
-            </div>
-            <div>
-                <div style="font-size: 0.75em; color: #666;">지방</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['fat']}</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Energy', '정보 없음')}</div>
             </div>
             <div>
                 <div style="font-size: 0.75em; color: #666;">탄수화물</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['carbohydrates']}</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Carbohydrates', '정보 없음')}</div>
             </div>
             <div>
-                <div style="font-size: 0.75em; color: #666;">당류</div>
-                <div style="font-size: 0.9em; margin-top: 2px;">{food_info['sugar']}</div>
+                <div style="font-size: 0.75em; color: #666;">단백질</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Protein', '정보 없음')}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">지방</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Fat', '정보 없음')}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">식이섬유</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Dietary_Fiber', '정보 없음')}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.75em; color: #666;">나트륨</div>
+                <div style="font-size: 0.9em; margin-top: 2px;">{food_info.get('Sodium', '정보 없음')}</div>
             </div>
         </div>
     </div>

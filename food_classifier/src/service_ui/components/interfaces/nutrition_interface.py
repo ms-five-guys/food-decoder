@@ -56,12 +56,12 @@ def process_and_append(image, history):
     # 첫 번째 음식인 경우 (history가 비어있는 경우)
     if not history:
         totals = {
-            'calories': extract_number(result['food_info']['calories']),
-            'water': extract_number(result['food_info']['water']),
-            'protein': extract_number(result['food_info']['protein']),
-            'fat': extract_number(result['food_info']['fat']),
-            'carbohydrates': extract_number(result['food_info']['carbohydrates']),
-            'sugar': extract_number(result['food_info']['sugar'])
+            'calories': extract_number(result['food_info'].get('Energy', '0')),
+            'carbohydrates': extract_number(result['food_info'].get('Carbohydrates', '0')),
+            'protein': extract_number(result['food_info'].get('Protein', '0')),
+            'fat': extract_number(result['food_info'].get('Fat', '0')),
+            'fiber': extract_number(result['food_info'].get('Dietary_Fiber', '0')),
+            'sodium': extract_number(result['food_info'].get('Sodium', '0'))
         }
         
         # 경고 섹션 생성
@@ -89,12 +89,12 @@ def process_and_append(image, history):
         
         # 새로운 음식의 영양성분을 더함
         new_totals = {
-            'calories': current_totals['calories'] + extract_number(result['food_info']['calories']),
-            'water': current_totals['water'] + extract_number(result['food_info']['water']),
-            'protein': current_totals['protein'] + extract_number(result['food_info']['protein']),
-            'fat': current_totals['fat'] + extract_number(result['food_info']['fat']),
-            'carbohydrates': current_totals['carbohydrates'] + extract_number(result['food_info']['carbohydrates']),
-            'sugar': current_totals['sugar'] + extract_number(result['food_info']['sugar'])
+            'calories': current_totals['calories'] + extract_number(result['food_info'].get('Energy', '0')),
+            'carbohydrates': current_totals['carbohydrates'] + extract_number(result['food_info'].get('Carbohydrates', '0')),
+            'protein': current_totals['protein'] + extract_number(result['food_info'].get('Protein', '0')),
+            'fat': current_totals['fat'] + extract_number(result['food_info'].get('Fat', '0')),
+            'fiber': current_totals['fiber'] + extract_number(result['food_info'].get('Dietary_Fiber', '0')),
+            'sodium': current_totals['sodium'] + extract_number(result['food_info'].get('Sodium', '0'))
         }
         
         # 경고 섹션 업데이트
