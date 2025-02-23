@@ -143,7 +143,7 @@ class DatabaseClient:
     def get_food_info_from_db(self, food_name):
         """
         Query the nutrition database for food information based on the food name.
-        Also includes timestamp of when the food was consumed (created_at).
+        Returns nutritional information from nutrition_info table.
         """
         if not self.connection:
             print("No database connection.")
@@ -152,13 +152,11 @@ class DatabaseClient:
         try:
             cursor = self.connection.cursor(dictionary=True)
             
-            # Query for food information and created_at as consumption time
+            # Query for food information from nutrition_info table
             cursor.execute("""
-                SELECT n.*, cd.created_at as consumption_time 
-                FROM nutrition_info n 
-                LEFT JOIN customer_diets cd ON n.food_name = cd.food_name 
-                WHERE n.food_name = %s
-                ORDER BY cd.created_at DESC LIMIT 1
+                SELECT food_id, food_name, Energy, Carbohydrates, Protein, Fat, Dietary_Fiber, Sodium
+                FROM nutrition_info 
+                WHERE food_name = %s
             """, (food_name,))
             food_info = cursor.fetchone()
             
