@@ -79,7 +79,7 @@ class CustomerProcessor:
     
     def _create_nutrition_plot(self, nutrition_info):
         """Create nutrition history plot in a single vertical column"""
-        dates = [nutrition['date'] for nutrition in nutrition_info['recent_nutrition']]
+        dates = [nutrition['date'].strftime('%Y-%m-%d') for nutrition in nutrition_info['recent_nutrition']]
         
         plot_configs = [
             {'data': 'total_calories', 'title': 'Calories', 'color': '#FF6B6B', 'ylabel': 'kcal', 'rec_key': 'calories'},
@@ -113,7 +113,7 @@ class CustomerProcessor:
                                    color='#FF4444',
                                    s=100,
                                    zorder=5)
-                    axs[idx].annotate(f'{value}', 
+                    axs[idx].annotate(f'{value:.1f}', 
                                     xy=(date, value),
                                     xytext=(5, 5),
                                     textcoords='offset points',
@@ -124,7 +124,7 @@ class CustomerProcessor:
                                    color='#FFA500',
                                    s=100,
                                    zorder=5)
-                    axs[idx].annotate(f'{value}', 
+                    axs[idx].annotate(f'{value:.1f}', 
                                     xy=(date, value),
                                     xytext=(5, 5),
                                     textcoords='offset points',
