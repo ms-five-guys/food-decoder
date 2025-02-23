@@ -12,12 +12,7 @@ from clients.db_client import DatabaseClient
 class FoodProcessor:
     def __init__(self, ml_client=None, db_client=None):
         self.ml_client = ml_client or MLClient()
-        self.db_client = db_client or DatabaseClient(
-            host='azure-mysql-host',
-            user='username',
-            password='password',
-            database='database-name'
-        )
+        self.db_client = db_client or DatabaseClient()
     
     def get_nutritional_info(self, image):
         """Process food image and get nutritional information"""

@@ -14,12 +14,7 @@ plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitay
 
 class CustomerProcessor:
     def __init__(self, db_client=None):
-        self.db_client = db_client or DatabaseClient(
-            host='azure-mysql-host',
-            user='username',
-            password='password',
-            database='database-name'
-        )
+        self.db_client = db_client or DatabaseClient()
     
     def get_customer_info(self, customer_code, guardian_code):
         """Get customer information and visualize nutrition history"""

@@ -1,27 +1,42 @@
+import os
 import mysql.connector
 from datetime import datetime, timedelta
+from pathlib import Path
 
 class DatabaseClient:
-    def __init__(self, host, user, password, database):
+    def __init__(self):
         """
         Initialize the database client with connection parameters.
+        If no parameters are provided, use environment variables from .env file.
         """
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
+        env_path = Path('/etc/food-classifier/.env')
+        
+        # Load environment variables from .env file
+        with open(env_path, 'r') as f:
+            for line in f:
+                if '=' in line:
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value.strip('"').strip("'")
+        
+        # Use environment variables
+        self.host = os.getenv('AZURE_MYSQL_HOST')
+        self.user = os.getenv('AZURE_MYSQL_USER')
+        self.password = os.getenv('AZURE_MYSQL_PASSWORD')
+        self.database = os.getenv('AZURE_MYSQL_DATABASE')
+        self.ssl_ca = os.getenv('AZURE_MYSQL_SSL_CA')
         self.connection = None
 
     def connect(self):
         """
-        Establish a connection to the MySQL database.
+        Establish a connection to the Azure MySQL database.
         """
         try:
             self.connection = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
                 password=self.password,
-                database=self.database
+                database=self.database,
+                ssl_ca=self.ssl_ca
             )
         except mysql.connector.Error as err:
             print("Error connecting to database:", str(err))
