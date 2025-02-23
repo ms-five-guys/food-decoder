@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timezone, timedelta
 
 def extract_number(value):
     """
@@ -29,8 +30,9 @@ def create_food_card(food_info, confidence):
     """
     Create a card for food information
     """
-    # 섭취 시간 포맷팅
-    consumption_time = food_info['created_at'].strftime("%Y-%m-%d %H:%M")
+    # Use current time in KST
+    kst = timezone(timedelta(hours=9))
+    consumption_time = datetime.now(kst).strftime("%Y-%m-%d %H:%M")
     
     return f"""
     <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
