@@ -55,4 +55,29 @@ class FoodProcessor:
                 'error': f"Error: {str(e)}",
                 'food_info': None,
                 'confidence': 0
-            } 
+            }
+
+    def get_recommended_values(self):
+        """Get recommended nutritional values for the current customer"""
+        try:
+            from .customer_processing import get_customer_id
+            
+            self.db_client.connect()
+            recommended = self.db_client.get_recommended_nutrition(get_customer_id())
+            
+            if recommended:
+                return {
+                    'calories': recommended['Energy_max'],
+                    'carbohydrates': recommended['Carbohydrates_max'],
+                    'protein': recommended['Protein_max'],
+                    'fat': recommended['Fat_max'],
+                    'fiber': recommended['Dietary_Fiber_max'],
+                    'sodium': recommended['Sodium_max']
+                }
+            return None
+            
+        except Exception as e:
+            print(f"Error getting recommended values: {str(e)}")
+            return None
+        finally:
+            self.db_client.close() 

@@ -12,8 +12,7 @@ from utils.nutrition_utils import (
     create_food_card,
     create_summary_section,
     create_warning_section,
-    extract_number,
-    get_recommended_daily_values
+    extract_number
 )
 
 # Initialize processor
@@ -21,6 +20,21 @@ food_processor = FoodProcessor()
 
 def process_and_append(image, history):
     """Process new image and append result to history"""
+
+    # Get recommended values first
+    recommended_values = food_processor.get_recommended_values()
+    if not recommended_values:
+        error_html = """
+        <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
+             background-color: #FFEBEE; overflow: hidden;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+            <div style="font-size: 0.9em; color: #C62828;">
+                권장 섭취량 정보를 가져올 수 없습니다.
+            </div>
+        </div>
+        """
+        return error_html, ""
+
     # if image is not present, process
     if image is None:
         error_html = f"""
@@ -34,10 +48,8 @@ def process_and_append(image, history):
         """
         return history + error_html if history else error_html, history if history else ""
     
-    # 이미지가 있는 경우 기존 로직 실행
     result = food_processor.get_nutritional_info(image)
     
-    # get_nutritional_info 결과 검증
     if not result or 'food_info' not in result:
         error_html = f"""
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
@@ -65,10 +77,10 @@ def process_and_append(image, history):
         }
         
         # 경고 섹션 생성
-        warning_section = create_warning_section(totals)
+        warning_section = create_warning_section(totals, recommended_values)
         
         # 요약 섹션 생성
-        summary_section = create_summary_section(totals)
+        summary_section = create_summary_section(totals, recommended_values)
         
         # 전체 HTML 생성
         full_html = f"""
@@ -85,7 +97,7 @@ def process_and_append(image, history):
     # 기존 기록이 있는 경우
     else:
         # 현재 총계 추출
-        current_totals = extract_totals_from_html(history)
+        current_totals = extract_totals_from_html(history, recommended_values)
         
         # 새로운 음식의 영양성분을 더함
         new_totals = {
@@ -98,10 +110,10 @@ def process_and_append(image, history):
         }
         
         # 경고 섹션 업데이트
-        warning_section = create_warning_section(new_totals)
+        warning_section = create_warning_section(new_totals, recommended_values)
         
         # 요약 섹션 업데이트
-        summary_section = create_summary_section(new_totals)
+        summary_section = create_summary_section(new_totals, recommended_values)
         
         start_idx = history.find('🍽️ 오늘 식사 기록</h3>')
         if start_idx != -1:
@@ -128,10 +140,9 @@ def process_and_append(image, history):
         
         return full_html, full_html
 
-def extract_totals_from_html(html):
+def extract_totals_from_html(html, recommended):
     """Extract the current totals from the summary section in the HTML"""
-    recommended = get_recommended_daily_values()
-    
+
     # Find all percentage values in the summary section
     percentages = re.findall(r'text-align: right;">(\d+)%</div>', html)
     

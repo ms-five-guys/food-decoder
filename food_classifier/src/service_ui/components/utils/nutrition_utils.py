@@ -11,21 +11,6 @@ def extract_number(value):
     match = re.search(r'(\d+\.?\d*)', str(value))
     return float(match.group(1)) if match else 0.0
 
-def get_recommended_daily_values():
-    """
-    return daily recommended intake
-    based on 2020 Korean Dietary Reference Intakes for Koreans
-    adult male standard (19-29 years old)
-    """
-    return {
-        'calories': 2600,        # kcal
-        'carbohydrates': 360,    # g (총 에너지의 약 55-65%)
-        'protein': 65,           # g
-        'fat': 65,              # g (총 에너지의 약 20-25%)
-        'fiber': 25,            # g
-        'sodium': 2300          # mg
-    }
-
 def create_food_card(food_info, confidence):
     """
     Create a card for food information
@@ -70,13 +55,10 @@ def create_food_card(food_info, confidence):
     </div>
     """
 
-def create_warning_section(totals):
+def create_warning_section(totals, recommended):
     """
     create warning section for nutritional components intake
     """
-    recommended = get_recommended_daily_values()
-    warnings = []
-    
     # calculate intake percentage for each nutritional component and check if it exceeds 100%
     percentages = {
         '에너지': (totals['calories'] / recommended['calories']) * 100,
@@ -105,12 +87,10 @@ def create_warning_section(totals):
     </div>
     """
 
-def create_summary_section(totals):
+def create_summary_section(totals, recommended):
     """
     create summary section for nutritional components
     """
-    recommended = get_recommended_daily_values()
-    
     return f"""
     <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
         <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">📊 하루 권장 영양성분 총계</h3>

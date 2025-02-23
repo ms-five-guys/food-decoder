@@ -166,3 +166,35 @@ class DatabaseClient:
         except mysql.connector.Error as err:
             print("Database error:", str(err))
             return None
+
+    def get_recommended_nutrition(self, customer_id):
+        """
+        Get recommended nutrition ranges for a customer.
+        """
+        if not self.connection:
+            print("No database connection.")
+            return None
+
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            
+            # Query for recommended nutrition ranges
+            cursor.execute("""
+                SELECT 
+                    Energy_min, Energy_max,
+                    Carbohydrates_min, Carbohydrates_max,
+                    Protein_min, Protein_max,
+                    Fat_min, Fat_max,
+                    Dietary_Fiber_min, Dietary_Fiber_max,
+                    Sodium_min, Sodium_max
+                FROM recommended_nutrition
+                WHERE customer_id = %s
+            """, (customer_id,))
+            recommended = cursor.fetchone()
+            
+            cursor.close()
+            return recommended
+            
+        except mysql.connector.Error as err:
+            print("Database error:", str(err))
+            return None
