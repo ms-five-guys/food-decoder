@@ -36,6 +36,16 @@ class FoodProcessor:
             # Get nutritional information
             self.db_client.connect()
             food_info = self.db_client.get_food_info_from_db(food_name)
+            
+            if food_info and current_session.is_active():
+                # Record food consumption
+                success = self.db_client.record_food_consumption(
+                    customer_id=current_session.customer_id,
+                    food_id=food_info['food_id']
+                )
+                if not success:
+                    print(f"Failed to record food consumption for food_id: {food_info['food_id']}")
+            
             self.db_client.close()
             
             if not food_info:
