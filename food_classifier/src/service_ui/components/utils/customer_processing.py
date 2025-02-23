@@ -19,7 +19,7 @@ class CustomerProcessor:
     def get_customer_info(self, customer_code, guardian_code):
         """Get customer information and visualize nutrition history"""
         if not customer_code or not guardian_code:
-            return None, "고객 코드 또는 보호자 코드를 확인해주세요.", None, None
+            return None, "고객 코드 또는 보호자 코드를 확인해주세요.", None
         
         try:
             self.db_client.connect()
@@ -32,24 +32,26 @@ class CustomerProcessor:
             
             if not customer_info:
                 self.db_client.close()
-                return None, "고객 정보를 찾을 수 없습니다.", None, None
+                return None, "고객 정보를 찾을 수 없습니다.", None
             
-            # 영양 정보 조회
-            nutrition_info = self.db_client.get_customer_nutrition_info(customer_info['customer_id'])
-            
-            self.db_client.close()
-            
-            # Process customer photo
-            photo = self._process_customer_photo(customer_info['photo_url'])
-            
-            # Create visualizations
-            customer_detail_text = self._create_customer_detail_text(customer_info)
-            nutrition_plot = self._create_nutrition_plot(nutrition_info)
-            
-            return photo, customer_detail_text, nutrition_plot
+            try:
+                # Process customer photo
+                photo = self._process_customer_photo(customer_info['photo_url'])
+                
+                # 영양 정보 조회
+                nutrition_info = self.db_client.get_customer_nutrition_info(customer_info['customer_id'])
+                
+                # Create visualizations
+                customer_detail_text = self._create_customer_detail_text(customer_info)
+                nutrition_plot = self._create_nutrition_plot(nutrition_info)
+                
+                return photo, customer_detail_text, nutrition_plot
+                
+            finally:
+                self.db_client.close()
             
         except Exception as e:
-            return None, f"오류가 발생했습니다: {str(e)}", None, None
+            return None, f"오류가 발생했습니다: {str(e)}", None
     
     def _process_customer_photo(self, photo_url):
         """Process and resize customer photo"""
