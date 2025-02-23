@@ -198,3 +198,28 @@ class DatabaseClient:
         except mysql.connector.Error as err:
             print("Database error:", str(err))
             return None
+
+    def record_food_consumption(self, customer_id, food_id):
+        """
+        Record food consumption in the database
+        """
+        if not self.connection:
+            print("No database connection.")
+            return False
+
+        try:
+            cursor = self.connection.cursor()
+            
+            # Insert consumption record
+            cursor.execute("""
+                INSERT INTO consumption (customer_id, food_id)
+                VALUES (%s, %s)
+            """, (customer_id, food_id))
+            
+            self.connection.commit()
+            cursor.close()
+            return True
+            
+        except mysql.connector.Error as err:
+            print(f"Error recording food consumption: {str(err)}")
+            return False
