@@ -8,6 +8,7 @@ sys.path.append(parent_dir)
 
 from clients.ml_client import MLClient
 from clients.db_client import DatabaseClient
+from .customer_session import current_session
 
 class FoodProcessor:
     def __init__(self, ml_client=None, db_client=None):
@@ -60,10 +61,12 @@ class FoodProcessor:
     def get_recommended_values(self):
         """Get recommended nutritional values for the current customer"""
         try:
-            from .customer_processing import get_customer_id
-            
+            if not current_session.is_active():
+                print("No active customer session")
+                return None
+                
             self.db_client.connect()
-            recommended = self.db_client.get_recommended_nutrition(get_customer_id())
+            recommended = self.db_client.get_recommended_nutrition(current_session.customer_id)
             
             if recommended:
                 return {
