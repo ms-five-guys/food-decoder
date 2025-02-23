@@ -38,6 +38,10 @@ jobs:
             curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
             sudo apt install -y nodejs
 
+            # SSL certificate download and setup
+            sudo curl -o /etc/ssl/certs/DigiCertGlobalRootCA.crt.pem https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+            sudo chmod 644 /etc/ssl/certs/DigiCertGlobalRootCA.crt.pem
+
             # Create environment variable file (with 600 permission)
             umask 077
             cat > /etc/food-classifier/.env << 'EOL'
@@ -45,6 +49,11 @@ jobs:
             AZURE_CUSTOM_VISION_API_KEY="${{ secrets.AZURE_CUSTOM_VISION_API_KEY }}"
             AZURE_CUSTOM_VISION_PROJECT_ID="${{ secrets.AZURE_CUSTOM_VISION_PROJECT_ID }}"
             AZURE_CUSTOM_VISION_MODEL_NAME="${{ secrets.AZURE_CUSTOM_VISION_MODEL_NAME }}"
+            AZURE_MYSQL_HOST="${{ secrets.AZURE_MYSQL_HOST }}"
+            AZURE_MYSQL_DATABASE="${{ secrets.AZURE_MYSQL_DATABASE }}"
+            AZURE_MYSQL_USER="${{ secrets.AZURE_MYSQL_USER }}"
+            AZURE_MYSQL_PASSWORD="${{ secrets.AZURE_MYSQL_PASSWORD }}"
+            AZURE_MYSQL_SSL_CA=/etc/ssl/certs/DigiCertGlobalRootCA.crt.pem
             EOL
             
             cd ~/food-classifier

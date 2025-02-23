@@ -16,13 +16,13 @@ def get_customer_details(customer_code, guardian_code):
     # 입력값 검증
     if not customer_code or not guardian_code:
         gr.Warning("고객 코드 또는 보호자 코드를 확인해주세요.")
-        return None, "", None, None
+        return None, "", None
     
     photo, info_text, plot = customer_processor.get_customer_info(customer_code, guardian_code)
     
     if photo is None:
         gr.Error(info_text)
-        return None, "", None, None
+        return None, "", None
     
     return photo, info_text, plot
 
