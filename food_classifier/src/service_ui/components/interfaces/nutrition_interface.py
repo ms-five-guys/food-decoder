@@ -44,7 +44,7 @@ def process_and_append(image, history):
              background-color: #FFEBEE; overflow: hidden;">
             <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
             <div style="font-size: 0.9em; color: #C62828;">
-                음식을 인식할 수 없습니다. 다시 시도해주세요.
+                머신러닝 서버에서 오류가 발생했습니다. 다시 시도해주세요.
             </div>
         </div>
         """
