@@ -26,8 +26,7 @@ if __name__ == "__main__":
              "Dietary_Fiber": 3,
              "Sodium": 900,
              "created_at": datetime(2024, 2, 15, 12, 30, 0)
-         }), \
-         patch('clients.ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.5)):
+         }):
         demo.launch(
             server_name="0.0.0.0",  # Allow external connections
             server_port=7860,       # Specify port
