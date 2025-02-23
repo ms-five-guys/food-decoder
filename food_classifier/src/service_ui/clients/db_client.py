@@ -2,6 +2,7 @@ import os
 import mysql.connector
 from datetime import datetime, timedelta
 from pathlib import Path
+import pytz
 
 class DatabaseClient:
     def __init__(self):
@@ -143,7 +144,7 @@ class DatabaseClient:
     def get_food_info_from_db(self, food_name):
         """
         Query the nutrition database for food information based on the food name.
-        Also includes timestamp of when the food was consumed (created_at).
+        Returns nutritional information from nutrition_info table.
         """
         if not self.connection:
             print("No database connection.")
@@ -152,13 +153,11 @@ class DatabaseClient:
         try:
             cursor = self.connection.cursor(dictionary=True)
             
-            # Query for food information and created_at as consumption time
+            # Query for food information from nutrition_info table
             cursor.execute("""
-                SELECT n.*, cd.created_at as consumption_time 
-                FROM nutrition_info n 
-                LEFT JOIN customer_diets cd ON n.food_name = cd.food_name 
-                WHERE n.food_name = %s
-                ORDER BY cd.created_at DESC LIMIT 1
+                SELECT food_id, food_name, Energy, Carbohydrates, Protein, Fat, Dietary_Fiber, Sodium
+                FROM nutrition_info 
+                WHERE food_name = %s
             """, (food_name,))
             food_info = cursor.fetchone()
             
@@ -168,3 +167,64 @@ class DatabaseClient:
         except mysql.connector.Error as err:
             print("Database error:", str(err))
             return None
+
+    def get_recommended_nutrition(self, customer_id):
+        """
+        Get recommended nutrition ranges for a customer.
+        """
+        if not self.connection:
+            print("No database connection.")
+            return None
+
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            
+            # Query for recommended nutrition ranges
+            cursor.execute("""
+                SELECT 
+                    Energy_min, Energy_max,
+                    Carbohydrates_min, Carbohydrates_max,
+                    Protein_min, Protein_max,
+                    Fat_min, Fat_max,
+                    Dietary_Fiber_min, Dietary_Fiber_max,
+                    Sodium_min, Sodium_max
+                FROM recommended_nutrition
+                WHERE customer_id = %s
+            """, (customer_id,))
+            recommended = cursor.fetchone()
+            
+            cursor.close()
+            return recommended
+            
+        except mysql.connector.Error as err:
+            print("Database error:", str(err))
+            return None
+
+    def record_food_consumption(self, customer_id, food_id):
+        """
+        Record food consumption in the database with KST (Korea Standard Time)
+        """
+        if not self.connection:
+            print("No database connection.")
+            return False
+
+        try:
+            cursor = self.connection.cursor()
+            
+            # Get current time in KST
+            kst = pytz.timezone('Asia/Seoul')
+            now = datetime.now(kst)
+            
+            # Insert consumption record with KST
+            cursor.execute("""
+                INSERT INTO consumption (customer_id, food_id, time, date)
+                VALUES (%s, %s, %s, %s)
+            """, (customer_id, food_id, now, now.date()))
+            
+            self.connection.commit()
+            cursor.close()
+            return True
+            
+        except mysql.connector.Error as err:
+            print(f"Error recording food consumption: {str(err)}")
+            return False

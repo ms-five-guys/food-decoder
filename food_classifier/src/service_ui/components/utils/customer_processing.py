@@ -10,6 +10,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..',
 sys.path.append(parent_dir)
 
 from clients.db_client import DatabaseClient
+from .customer_session import current_session
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 class CustomerProcessor:
@@ -38,8 +39,11 @@ class CustomerProcessor:
                 # Process customer photo
                 photo = self._process_customer_photo(customer_info['photo_url'])
                 
-                # 영양 정보 조회
-                nutrition_info = self.db_client.get_customer_nutrition_info(customer_info['customer_id'])
+                # 고객 정보 설정
+                current_session.set_customer(customer_info)
+                
+                # 고객 ID 사용
+                nutrition_info = self.db_client.get_customer_nutrition_info(current_session.customer_id)
                 
                 # Create visualizations
                 customer_detail_text = self._create_customer_detail_text(customer_info)

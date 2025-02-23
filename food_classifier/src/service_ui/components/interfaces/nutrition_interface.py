@@ -12,8 +12,7 @@ from utils.nutrition_utils import (
     create_food_card,
     create_summary_section,
     create_warning_section,
-    extract_number,
-    get_recommended_daily_values
+    extract_number
 )
 
 # Initialize processor
@@ -21,6 +20,21 @@ food_processor = FoodProcessor()
 
 def process_and_append(image, history):
     """Process new image and append result to history"""
+
+    # Get recommended values first
+    recommended_values = food_processor.get_recommended_values()
+    if not recommended_values:
+        error_html = """
+        <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
+             background-color: #FFEBEE; overflow: hidden;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
+            <div style="font-size: 0.9em; color: #C62828;">
+                권장 섭취량 정보를 가져올 수 없습니다.
+            </div>
+        </div>
+        """
+        return error_html, ""
+
     # if image is not present, process
     if image is None:
         error_html = f"""
@@ -34,17 +48,15 @@ def process_and_append(image, history):
         """
         return history + error_html if history else error_html, history if history else ""
     
-    # 이미지가 있는 경우 기존 로직 실행
     result = food_processor.get_nutritional_info(image)
     
-    # get_nutritional_info 결과 검증
     if not result or 'food_info' not in result:
         error_html = f"""
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
              background-color: #FFEBEE; overflow: hidden;">
             <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
             <div style="font-size: 0.9em; color: #C62828;">
-                음식을 인식할 수 없습니다. 다시 시도해주세요.
+                머신러닝 서버에서 오류가 발생했습니다. 다시 시도해주세요.
             </div>
         </div>
         """
@@ -56,26 +68,26 @@ def process_and_append(image, history):
     # 첫 번째 음식인 경우 (history가 비어있는 경우)
     if not history:
         totals = {
-            'calories': extract_number(result['food_info']['calories']),
-            'water': extract_number(result['food_info']['water']),
-            'protein': extract_number(result['food_info']['protein']),
-            'fat': extract_number(result['food_info']['fat']),
-            'carbohydrates': extract_number(result['food_info']['carbohydrates']),
-            'sugar': extract_number(result['food_info']['sugar'])
+            'calories': extract_number(result['food_info'].get('Energy', '0')),
+            'carbohydrates': extract_number(result['food_info'].get('Carbohydrates', '0')),
+            'protein': extract_number(result['food_info'].get('Protein', '0')),
+            'fat': extract_number(result['food_info'].get('Fat', '0')),
+            'fiber': extract_number(result['food_info'].get('Dietary_Fiber', '0')),
+            'sodium': extract_number(result['food_info'].get('Sodium', '0'))
         }
         
         # 경고 섹션 생성
-        warning_section = create_warning_section(totals)
+        warning_section = create_warning_section(totals, recommended_values)
         
         # 요약 섹션 생성
-        summary_section = create_summary_section(totals)
+        summary_section = create_summary_section(totals, recommended_values)
         
         # 전체 HTML 생성
         full_html = f"""
         {warning_section}
         {summary_section}
         <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 식사 기록</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘 식사 기록</h3>
             {new_food_card}
         </div>
         """
@@ -85,40 +97,48 @@ def process_and_append(image, history):
     # 기존 기록이 있는 경우
     else:
         # 현재 총계 추출
-        current_totals = extract_totals_from_html(history)
+        current_totals = extract_totals_from_html(history, recommended_values)
         
         # 새로운 음식의 영양성분을 더함
         new_totals = {
-            'calories': current_totals['calories'] + extract_number(result['food_info']['calories']),
-            'water': current_totals['water'] + extract_number(result['food_info']['water']),
-            'protein': current_totals['protein'] + extract_number(result['food_info']['protein']),
-            'fat': current_totals['fat'] + extract_number(result['food_info']['fat']),
-            'carbohydrates': current_totals['carbohydrates'] + extract_number(result['food_info']['carbohydrates']),
-            'sugar': current_totals['sugar'] + extract_number(result['food_info']['sugar'])
+            'calories': current_totals['calories'] + extract_number(result['food_info'].get('Energy', '0')),
+            'carbohydrates': current_totals['carbohydrates'] + extract_number(result['food_info'].get('Carbohydrates', '0')),
+            'protein': current_totals['protein'] + extract_number(result['food_info'].get('Protein', '0')),
+            'fat': current_totals['fat'] + extract_number(result['food_info'].get('Fat', '0')),
+            'fiber': current_totals['fiber'] + extract_number(result['food_info'].get('Dietary_Fiber', '0')),
+            'sodium': current_totals['sodium'] + extract_number(result['food_info'].get('Sodium', '0'))
         }
         
         # 경고 섹션 업데이트
-        warning_section = create_warning_section(new_totals)
+        warning_section = create_warning_section(new_totals, recommended_values)
         
         # 요약 섹션 업데이트
-        summary_section = create_summary_section(new_totals)
+        summary_section = create_summary_section(new_totals, recommended_values)
         
-        # 기존 음식 기록 찾기 (🍽️ 식사 기록 제목 이후부터 다음 div 닫기 태그까지)
-        start_idx = history.find('🍽️ 식사 기록</h3>')
+        start_idx = history.find('🍽️ 오늘 식사 기록</h3>')
         if start_idx != -1:
             start_idx = history.find('</h3>', start_idx) + 5  # </h3> 다음부터
             food_records = history[start_idx:].strip()
         else:
             food_records = ""
+            
+        # 디버그 로그 추가
+        print("\n=== Food Records Debug Log ===")
+        print(f"Start Index: {start_idx}")
+        print(f"History Length: {len(history)}")
+        print(f"Found Records: {bool(food_records)}")
+        print(f"Food Records: {food_records[:100]}...")  # 처음 100자만 출력
         
         # 음식 기록에 새로운 카드 추가
         updated_food_records = f"""
         <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 식사 기록</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘 식사 기록</h3>
             {new_food_card}
             {food_records}
         </div>
         """
+        print(f"Updated Records Length: {len(updated_food_records)}")
+        print("=== Debug Log End ===\n")
         
         # 전체 HTML 업데이트
         full_html = f"""
@@ -129,36 +149,35 @@ def process_and_append(image, history):
         
         return full_html, full_html
 
-def extract_totals_from_html(html):
+def extract_totals_from_html(html, recommended):
     """Extract the current totals from the summary section in the HTML"""
-    recommended = get_recommended_daily_values()
-    
+
     # Find all percentage values in the summary section
     percentages = re.findall(r'text-align: right;">(\d+)%</div>', html)
     
     if len(percentages) >= 6:  # Make sure we found all 6 nutritional components
         return {
             'calories': (float(percentages[0]) / 100) * recommended['calories'],
-            'water': (float(percentages[1]) / 100) * recommended['water'],
+            'carbohydrates': (float(percentages[1]) / 100) * recommended['carbohydrates'],
             'protein': (float(percentages[2]) / 100) * recommended['protein'],
             'fat': (float(percentages[3]) / 100) * recommended['fat'],
-            'carbohydrates': (float(percentages[4]) / 100) * recommended['carbohydrates'],
-            'sugar': (float(percentages[5]) / 100) * recommended['sugar']
+            'fiber': (float(percentages[4]) / 100) * recommended['fiber'],
+            'sodium': (float(percentages[5]) / 100) * recommended['sodium']
         }
     else:
         return {
             'calories': 0,
-            'water': 0,
+            'carbohydrates': 0,
             'protein': 0,
             'fat': 0,
-            'carbohydrates': 0,
-            'sugar': 0
+            'fiber': 0,
+            'sodium': 0
         }
 
 def create_nutrition_interface():
     """Create nutritional information interface"""
     with gr.Blocks() as nutritional_info_interface:
-        gr.Markdown("## 🥗 Nutritional Information")
+        gr.Markdown("## 🥗 오늘의 식단 정보")
 
         with gr.Row():
             image_input = gr.Image(
