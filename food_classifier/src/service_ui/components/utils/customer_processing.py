@@ -32,19 +32,24 @@ class CustomerProcessor:
             # 고객 코드와 보호자 코드를 합쳐서 하나의 코드로 생성
             combined_code = f"{customer_code}-{guardian_code}"
             
-            # 고객 정보 조회 (combined_code 사용)
-            customer_info = self.db_client.get_customer_info(combined_code)
-            self.db_client.close()
+            # 고객 기본 정보 조회
+            customer_info = self.db_client.get_customer_basic_info(combined_code)
             
             if not customer_info:
+                self.db_client.close()
                 return None, "고객 정보를 찾을 수 없습니다.", None, None
             
+            # 영양 정보 조회
+            nutrition_info = self.db_client.get_customer_nutrition_info(customer_info['customer_id'])
+            
+            self.db_client.close()
+            
             # Process customer photo
-            photo = self._process_customer_photo(customer_info['basic_info']['photo_url'])
+            photo = self._process_customer_photo(customer_info['photo_url'])
             
             # Create visualizations
             customer_detail_text = self._create_customer_detail_text(customer_info)
-            nutrition_plot = self._create_nutrition_plot(customer_info)
+            nutrition_plot = self._create_nutrition_plot(nutrition_info)
             
             return photo, customer_detail_text, nutrition_plot
             
@@ -64,12 +69,12 @@ class CustomerProcessor:
         customer_info_text = "<div style='border: 1px solid #ccc; padding: 10px; border-radius: 5px;'>"
         customer_info_text += "<strong>고객 상세 정보</strong><br><br>"
         customer_info_text += "<table style='width:100%;'>"
-        customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['basic_info']['name']}</td></tr>"
-        customer_info_text += f"<tr><td><strong>나이</strong></td><td>{customer_info['basic_info'].get('age', 'N/A')}</td></tr>"
-        customer_info_text += f"<tr><td><strong>성별</strong></td><td>{customer_info['basic_info'].get('gender', 'N/A')}</td></tr>"
-        customer_info_text += f"<tr><td><strong>키</strong></td><td>{customer_info['basic_info'].get('height', 'N/A')} cm</td></tr>"
-        customer_info_text += f"<tr><td><strong>몸무게</strong></td><td>{customer_info['basic_info'].get('weight', 'N/A')} kg</td></tr>"
-        customer_info_text += f"<tr><td><strong>특이사항</strong></td><td>{customer_info['basic_info'].get('notes', 'N/A')}</td></tr>"
+        customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['name']}</td></tr>"
+        customer_info_text += f"<tr><td><strong>성별</strong></td><td>{'남성' if customer_info['gender'] == 'M' else '여성'}</td></tr>"
+        customer_info_text += f"<tr><td><strong>나이</strong></td><td>{customer_info['age']}세</td></tr>"
+        customer_info_text += f"<tr><td><strong>키</strong></td><td>{customer_info['height']} cm</td></tr>"
+        customer_info_text += f"<tr><td><strong>몸무게</strong></td><td>{customer_info['weight']} kg</td></tr>"
+        customer_info_text += f"<tr><td><strong>특이사항</strong></td><td>{customer_info['notes']}</td></tr>"
         customer_info_text += "</table>"
         customer_info_text += "</div>"
         

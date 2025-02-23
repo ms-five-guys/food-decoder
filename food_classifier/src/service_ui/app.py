@@ -18,41 +18,44 @@ if __name__ == "__main__":
     # Mock the database and ML server functions for testing
     with patch('clients.db_client.DatabaseClient.connect', return_value=None), \
          patch('clients.db_client.DatabaseClient.close', return_value=None), \
-         patch('clients.db_client.DatabaseClient.get_customer_info', return_value={
-             "basic_info": {
-                 "name": "아프냥",
-                 "gender": "여성",
-                 "age": "990101",
-                 "height": 160,
-                 "weight": 50,
-                 "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",
-                 "notes": "감기"
-             },
+         patch('clients.db_client.DatabaseClient.get_customer_basic_info', return_value={
+             "customer_id": 1,
+             "code": "C001-G001",
+             "name": "아프냥",
+             "gender": "F",
+             "age": 23,
+             "height": 160,
+             "weight": 50,
+             "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",
+             "notes": "감기"
+         }), \
+         patch('clients.db_client.DatabaseClient.get_customer_nutrition_info', return_value={
              "recent_nutrition": [
-                 {"date": "2025-02-11", "total_calories": 1800, "total_water": 500, "total_protein": 80, "total_fat": 70, "total_carbohydrates": 200, "total_sugar": 50},
-                 {"date": "2025-02-12", "total_calories": 2200, "total_water": 550, "total_protein": 90, "total_fat": 80, "total_carbohydrates": 250, "total_sugar": 60},
-                 {"date": "2025-02-13", "total_calories": 2000, "total_water": 530, "total_protein": 85, "total_fat": 115, "total_carbohydrates": 230, "total_sugar": 55},
-                 {"date": "2025-02-14", "total_calories": 2100, "total_water": 540, "total_protein": 88, "total_fat": 78, "total_carbohydrates": 240, "total_sugar": 58},
-                 {"date": "2025-02-15", "total_calories": 1900, "total_water": 520, "total_protein": 82, "total_fat": 72, "total_carbohydrates": 220, "total_sugar": 52}
+                 {"date": "2025-02-11", "total_calories": 1800, "total_carbohydrates": 200, "total_protein": 80, "total_fat": 70, "total_fiber": 25, "total_sodium": 2000},
+                 {"date": "2025-02-12", "total_calories": 2200, "total_carbohydrates": 250, "total_protein": 90, "total_fat": 80, "total_fiber": 28, "total_sodium": 2200},
+                 {"date": "2025-02-13", "total_calories": 2000, "total_carbohydrates": 230, "total_protein": 85, "total_fat": 75, "total_fiber": 26, "total_sodium": 2100},
+                 {"date": "2025-02-14", "total_calories": 2100, "total_carbohydrates": 240, "total_protein": 88, "total_fat": 78, "total_fiber": 27, "total_sodium": 2150},
+                 {"date": "2025-02-15", "total_calories": 1900, "total_carbohydrates": 220, "total_protein": 82, "total_fat": 72, "total_fiber": 24, "total_sodium": 2050}
              ],
              "recommended_nutrition": {
                  "calories": {"min": 1800, "max": 2200},
-                 "water": {"min": 500, "max": 600},
+                 "carbohydrates": {"min": 200, "max": 260},
                  "protein": {"min": 75, "max": 95},
                  "fat": {"min": 65, "max": 85},
-                 "carbohydrates": {"min": 200, "max": 260},
-                 "sugar": {"min": 45, "max": 65}
+                 "fiber": {"min": 20, "max": 30},
+                 "sodium": {"min": 1500, "max": 2300}
              }
          }), \
          patch('clients.db_client.DatabaseClient.get_food_info_from_db', return_value={
-             "name": "김치찌개",
-             "calories": "180kcal",
-             "water": "50g",
-             "protein": "12g",
-             "fat": "8g",
-             "carbohydrates": "15g",
-             "sugar": "3g",
-             "created_at": datetime(2024, 2, 15, 12, 30, 0)  # DB의 created_at 컬럼 값
+             "food_id": 1,
+             "food_name": "김치찌개",
+             "Energy": 180,
+             "Carbohydrates": 15,
+             "Protein": 12,
+             "Fat": 8,
+             "Dietary_Fiber": 3,
+             "Sodium": 900,
+             "created_at": datetime(2024, 2, 15, 12, 30, 0)
          }), \
          patch('clients.ml_client.MLClient.get_food_prediction', return_value=("김치찌개", 95.5)):
         demo.launch(
