@@ -2,6 +2,7 @@ import os
 import mysql.connector
 from datetime import datetime, timedelta
 from pathlib import Path
+import pytz
 
 class DatabaseClient:
     def __init__(self):
@@ -201,7 +202,7 @@ class DatabaseClient:
 
     def record_food_consumption(self, customer_id, food_id):
         """
-        Record food consumption in the database
+        Record food consumption in the database with KST (Korea Standard Time)
         """
         if not self.connection:
             print("No database connection.")
@@ -210,11 +211,15 @@ class DatabaseClient:
         try:
             cursor = self.connection.cursor()
             
-            # Insert consumption record
+            # Get current time in KST
+            kst = pytz.timezone('Asia/Seoul')
+            now = datetime.now(kst)
+            
+            # Insert consumption record with KST
             cursor.execute("""
-                INSERT INTO consumption (customer_id, food_id)
-                VALUES (%s, %s)
-            """, (customer_id, food_id))
+                INSERT INTO consumption (customer_id, food_id, time, date)
+                VALUES (%s, %s, %s, %s)
+            """, (customer_id, food_id, now, now.date()))
             
             self.connection.commit()
             cursor.close()
