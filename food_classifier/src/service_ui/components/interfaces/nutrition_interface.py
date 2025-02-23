@@ -87,7 +87,7 @@ def process_and_append(image, history):
         {warning_section}
         {summary_section}
         <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 식사 기록</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘 식사 기록</h3>
             {new_food_card}
         </div>
         """
@@ -121,15 +121,24 @@ def process_and_append(image, history):
             food_records = history[start_idx:].strip()
         else:
             food_records = ""
+            
+        # 디버그 로그 추가
+        print("\n=== Food Records Debug Log ===")
+        print(f"Start Index: {start_idx}")
+        print(f"History Length: {len(history)}")
+        print(f"Found Records: {bool(food_records)}")
+        print(f"Food Records: {food_records[:100]}...")  # 처음 100자만 출력
         
         # 음식 기록에 새로운 카드 추가
         updated_food_records = f"""
         <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 식사 기록</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘 식사 기록</h3>
             {new_food_card}
             {food_records}
         </div>
         """
+        print(f"Updated Records Length: {len(updated_food_records)}")
+        print("=== Debug Log End ===\n")
         
         # 전체 HTML 업데이트
         full_html = f"""
