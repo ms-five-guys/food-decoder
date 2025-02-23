@@ -65,11 +65,11 @@ class CustomerProcessor:
         customer_info_text += "<strong>고객 상세 정보</strong><br><br>"
         customer_info_text += "<table style='width:100%;'>"
         customer_info_text += f"<tr><td><strong>성함</strong></td><td>{customer_info['basic_info']['name']}</td></tr>"
-        customer_info_text += f"<tr><td><strong>생년월일</strong></td><td>{customer_info['basic_info'].get('id_number', 'N/A')}</td></tr>"
+        customer_info_text += f"<tr><td><strong>나이</strong></td><td>{customer_info['basic_info'].get('age', 'N/A')}</td></tr>"
         customer_info_text += f"<tr><td><strong>성별</strong></td><td>{customer_info['basic_info'].get('gender', 'N/A')}</td></tr>"
         customer_info_text += f"<tr><td><strong>키</strong></td><td>{customer_info['basic_info'].get('height', 'N/A')} cm</td></tr>"
         customer_info_text += f"<tr><td><strong>몸무게</strong></td><td>{customer_info['basic_info'].get('weight', 'N/A')} kg</td></tr>"
-        customer_info_text += f"<tr><td><strong>특이사항</strong></td><td>{customer_info['basic_info'].get('special_conditions', 'N/A')}</td></tr>"
+        customer_info_text += f"<tr><td><strong>특이사항</strong></td><td>{customer_info['basic_info'].get('notes', 'N/A')}</td></tr>"
         customer_info_text += "</table>"
         customer_info_text += "</div>"
         

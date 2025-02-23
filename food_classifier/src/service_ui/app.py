@@ -21,12 +21,12 @@ if __name__ == "__main__":
          patch('clients.db_client.DatabaseClient.get_customer_info', return_value={
              "basic_info": {
                  "name": "아프냥",
-                 "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",
-                 "id_number": "990101",
                  "gender": "여성",
+                 "age": "990101",
                  "height": 160,
                  "weight": 50,
-                 "special_conditions": "감기"
+                 "photo_url": "https://github.com/user-attachments/assets/39f8ce21-a0d3-4878-8b98-5d02f99ac62c",
+                 "notes": "감기"
              },
              "recent_nutrition": [
                  {"date": "2025-02-11", "total_calories": 1800, "total_water": 500, "total_protein": 80, "total_fat": 70, "total_carbohydrates": 200, "total_sugar": 50},
