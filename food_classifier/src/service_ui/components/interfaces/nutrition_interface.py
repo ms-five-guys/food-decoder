@@ -103,8 +103,7 @@ def process_and_append(image, history):
         # 요약 섹션 업데이트
         summary_section = create_summary_section(new_totals)
         
-        # 기존 음식 기록 찾기 (🍽️ 식사 기록 제목 이후부터 다음 div 닫기 태그까지)
-        start_idx = history.find('🍽️ 식사 기록</h3>')
+        start_idx = history.find('🍽️ 오늘 식사 기록</h3>')
         if start_idx != -1:
             start_idx = history.find('</h3>', start_idx) + 5  # </h3> 다음부터
             food_records = history[start_idx:].strip()
@@ -158,7 +157,7 @@ def extract_totals_from_html(html):
 def create_nutrition_interface():
     """Create nutritional information interface"""
     with gr.Blocks() as nutritional_info_interface:
-        gr.Markdown("## 🥗 Nutritional Information")
+        gr.Markdown("## 🥗 오늘의 식단 정보")
 
         with gr.Row():
             image_input = gr.Image(
