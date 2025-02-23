@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import requests
 import matplotlib.pyplot as plt
+import streamlit as st
 
 # Add the parent directory to the system path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -39,7 +40,8 @@ class CustomerProcessor:
                 photo = self._process_customer_photo(customer_info['photo_url'])
                 
                 # 영양 정보 조회
-                nutrition_info = self.db_client.get_customer_nutrition_info(customer_info['customer_id'])
+                store_customer_id(customer_info['customer_id'])
+                nutrition_info = self.db_client.get_customer_nutrition_info(get_customer_id())
                 
                 # Create visualizations
                 customer_detail_text = self._create_customer_detail_text(customer_info)
@@ -146,3 +148,11 @@ class CustomerProcessor:
 
         plt.tight_layout(pad=4.0)
         return fig 
+
+def store_customer_id(customer_id):
+    """Store customer ID in session state"""
+    st.session_state['customer_id'] = customer_id
+
+def get_customer_id():
+    """Get customer ID from session state"""
+    return st.session_state.get('customer_id') 
