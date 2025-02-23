@@ -3,8 +3,8 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - main
-      #- feat/impl-service-ui
+      # - main
+      - feat/integrate-azure-db-with-second-page
 
 jobs:
   deploy:
