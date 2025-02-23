@@ -89,14 +89,17 @@ class DatabaseClient:
             
             # Query for recent 5 days nutritional intake
             five_days_ago = datetime.now() - timedelta(days=5)
+            
+            # 쿼리 수정: date로 그룹화하여 일별 총량 계산
             cursor.execute("""
-                SELECT c.date,
-                       SUM(n.Energy) as total_calories,
-                       SUM(n.Carbohydrates) as total_carbohydrates,
-                       SUM(n.Protein) as total_protein,
-                       SUM(n.Fat) as total_fat,
-                       SUM(n.Dietary_Fiber) as total_fiber,
-                       SUM(n.Sodium) as total_sodium
+                SELECT 
+                    c.date,
+                    SUM(n.Energy) as total_calories,
+                    SUM(n.Carbohydrates) as total_carbohydrates,
+                    SUM(n.Protein) as total_protein,
+                    SUM(n.Fat) as total_fat,
+                    SUM(n.Dietary_Fiber) as total_fiber,
+                    SUM(n.Sodium) as total_sodium
                 FROM consumption c
                 JOIN nutrition_info n ON c.food_id = n.food_id
                 WHERE c.customer_id = %s AND c.date >= %s
@@ -107,12 +110,13 @@ class DatabaseClient:
             
             # Query for recommended nutrition ranges
             cursor.execute("""
-                SELECT Energy_min, Energy_max,
-                       Carbohydrates_min, Carbohydrates_max,
-                       Protein_min, Protein_max,
-                       Fat_min, Fat_max,
-                       Dietary_Fiber_min, Dietary_Fiber_max,
-                       Sodium_min, Sodium_max
+                SELECT 
+                    Energy_min, Energy_max,
+                    Carbohydrates_min, Carbohydrates_max,
+                    Protein_min, Protein_max,
+                    Fat_min, Fat_max,
+                    Dietary_Fiber_min, Dietary_Fiber_max,
+                    Sodium_min, Sodium_max
                 FROM recommended_nutrition
                 WHERE customer_id = %s
             """, (customer_id,))
@@ -120,19 +124,16 @@ class DatabaseClient:
             
             cursor.close()
             
-            # Format recommended nutrition data
-            recommended_nutrition = {
-                'calories': {'min': recommended['Energy_min'], 'max': recommended['Energy_max']},
-                'carbohydrates': {'min': recommended['Carbohydrates_min'], 'max': recommended['Carbohydrates_max']},
-                'protein': {'min': recommended['Protein_min'], 'max': recommended['Protein_max']},
-                'fat': {'min': recommended['Fat_min'], 'max': recommended['Fat_max']},
-                'fiber': {'min': recommended['Dietary_Fiber_min'], 'max': recommended['Dietary_Fiber_max']},
-                'sodium': {'min': recommended['Sodium_min'], 'max': recommended['Sodium_max']}
-            }
-            
             return {
                 'recent_nutrition': recent_nutrition,
-                'recommended_nutrition': recommended_nutrition
+                'recommended_nutrition': {
+                    'calories': {'min': recommended['Energy_min'], 'max': recommended['Energy_max']},
+                    'carbohydrates': {'min': recommended['Carbohydrates_min'], 'max': recommended['Carbohydrates_max']},
+                    'protein': {'min': recommended['Protein_min'], 'max': recommended['Protein_max']},
+                    'fat': {'min': recommended['Fat_min'], 'max': recommended['Fat_max']},
+                    'fiber': {'min': recommended['Dietary_Fiber_min'], 'max': recommended['Dietary_Fiber_max']},
+                    'sodium': {'min': recommended['Sodium_min'], 'max': recommended['Sodium_max']}
+                }
             }
             
         except mysql.connector.Error as err:
