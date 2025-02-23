@@ -139,20 +139,20 @@ def extract_totals_from_html(html):
     if len(percentages) >= 6:  # Make sure we found all 6 nutritional components
         return {
             'calories': (float(percentages[0]) / 100) * recommended['calories'],
-            'water': (float(percentages[1]) / 100) * recommended['water'],
+            'carbohydrates': (float(percentages[1]) / 100) * recommended['carbohydrates'],
             'protein': (float(percentages[2]) / 100) * recommended['protein'],
             'fat': (float(percentages[3]) / 100) * recommended['fat'],
-            'carbohydrates': (float(percentages[4]) / 100) * recommended['carbohydrates'],
-            'sugar': (float(percentages[5]) / 100) * recommended['sugar']
+            'fiber': (float(percentages[4]) / 100) * recommended['fiber'],
+            'sodium': (float(percentages[5]) / 100) * recommended['sodium']
         }
     else:
         return {
             'calories': 0,
-            'water': 0,
+            'carbohydrates': 0,
             'protein': 0,
             'fat': 0,
-            'carbohydrates': 0,
-            'sugar': 0
+            'fiber': 0,
+            'sodium': 0
         }
 
 def create_nutrition_interface():

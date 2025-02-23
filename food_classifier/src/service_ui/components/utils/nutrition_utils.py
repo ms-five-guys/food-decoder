@@ -17,14 +17,12 @@ def get_recommended_daily_values():
     adult male standard (19-29 years old)
     """
     return {
-        'calories': 2600,     # kcal
-        'water': 2500,        # ml
-        'protein': 65,        # g
-        'fat': 65,           # g (총 에너지의 약 20-25%)
-        'carbohydrates': 360, # g (총 에너지의 약 55-65%)
-        'sugar': 50,          # g (총 에너지의 10% 이내)
-        'fiber': 25,          # g
-        'sodium': 2300        # mg
+        'calories': 2600,        # kcal
+        'carbohydrates': 360,    # g (총 에너지의 약 55-65%)
+        'protein': 65,           # g
+        'fat': 65,              # g (총 에너지의 약 20-25%)
+        'fiber': 25,            # g
+        'sodium': 2300          # mg
     }
 
 def create_food_card(food_info, confidence):
@@ -122,12 +120,12 @@ def create_summary_section(totals):
             </div>
             <div style="font-size: 0.9em; text-align: right;">{int((totals['calories'] / recommended['calories']) * 100)}%</div>
 
-            <div style="font-size: 0.9em; color: #666;">수분</div>
+            <div style="font-size: 0.9em; color: #666;">탄수화물</div>
             <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
-                <div style="width: {(totals['water'] / recommended['water']) * 100}%; height: 100%; 
-                     background-color: #2196F3; transition: width 0.3s ease;"></div>
+                <div style="width: {(totals['carbohydrates'] / recommended['carbohydrates']) * 100}%; height: 100%; 
+                     background-color: #9C27B0; transition: width 0.3s ease;"></div>
             </div>
-            <div style="font-size: 0.9em; text-align: right;">{int((totals['water'] / recommended['water']) * 100)}%</div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['carbohydrates'] / recommended['carbohydrates']) * 100)}%</div>
 
             <div style="font-size: 0.9em; color: #666;">단백질</div>
             <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
@@ -143,19 +141,19 @@ def create_summary_section(totals):
             </div>
             <div style="font-size: 0.9em; text-align: right;">{int((totals['fat'] / recommended['fat']) * 100)}%</div>
 
-            <div style="font-size: 0.9em; color: #666;">탄수화물</div>
+            <div style="font-size: 0.9em; color: #666;">식이섬유</div>
             <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
-                <div style="width: {(totals['carbohydrates'] / recommended['carbohydrates']) * 100}%; height: 100%; 
-                     background-color: #9C27B0; transition: width 0.3s ease;"></div>
+                <div style="width: {(totals['fiber'] / recommended['fiber']) * 100}%; height: 100%; 
+                     background-color: #2196F3; transition: width 0.3s ease;"></div>
             </div>
-            <div style="font-size: 0.9em; text-align: right;">{int((totals['carbohydrates'] / recommended['carbohydrates']) * 100)}%</div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['fiber'] / recommended['fiber']) * 100)}%</div>
 
-            <div style="font-size: 0.9em; color: #666;">당류</div>
+            <div style="font-size: 0.9em; color: #666;">나트륨</div>
             <div style="width: 100%; height: 24px; background-color: #f0f0f0; border-radius: 12px; overflow: hidden;">
-                <div style="width: {(totals['sugar'] / recommended['sugar']) * 100}%; height: 100%; 
+                <div style="width: {(totals['sodium'] / recommended['sodium']) * 100}%; height: 100%; 
                      background-color: #FF5722; transition: width 0.3s ease;"></div>
             </div>
-            <div style="font-size: 0.9em; text-align: right;">{int((totals['sugar'] / recommended['sugar']) * 100)}%</div>
+            <div style="font-size: 0.9em; text-align: right;">{int((totals['sodium'] / recommended['sodium']) * 100)}%</div>
         </div>
     </div>
     """ 
