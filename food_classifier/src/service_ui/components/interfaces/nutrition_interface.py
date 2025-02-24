@@ -27,9 +27,9 @@ def process_and_append(image, history):
         error_html = """
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
              background-color: #FFEBEE; overflow: hidden;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
-            <div style="font-size: 0.9em; color: #C62828;">
-                권장 섭취량 정보를 가져올 수 없습니다.
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #1976D2;">ℹ️ 안내</h3>
+            <div style="font-size: 0.9em; color: #0D47A1;">
+                고객 정보가 필요합니다. 고객 코드와 보호자 코드를 입력해 주세요.
             </div>
         </div>
         """
@@ -40,8 +40,8 @@ def process_and_append(image, history):
         error_html = f"""
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
              background-color: #FFEBEE; overflow: hidden;">
-            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
-            <div style="font-size: 0.9em; color: #C62828;">
+            <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #1976D2;">ℹ️ 안내</h3>
+            <div style="font-size: 0.9em; color: #0D47A1;">
                 이미지를 먼저 촬영해주세요.
             </div>
         </div>
@@ -207,8 +207,8 @@ def create_nutrition_interface():
                 error_html = f"""
                 <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; 
                      background-color: #FFEBEE; overflow: hidden;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #D32F2F;">❌ 오류</h3>
-                    <div style="font-size: 0.9em; color: #C62828;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; color: #1976D2;">ℹ️ 안내</h3>
+                    <div style="font-size: 0.9em; color: #0D47A1;">
                         이미지를 먼저 촬영해주세요.
                     </div>
                 </div>
