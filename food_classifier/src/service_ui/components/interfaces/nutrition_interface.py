@@ -36,7 +36,62 @@ def process_and_append(image, history, session_state):
         """
         return error_html, ""
 
-    # if image is not present, process
+    # Get today's consumption history if no history exists
+    if not history:
+        food_processor.db_client.connect()
+        consumption_records = food_processor.db_client.get_today_consumption_by_patient(session_state.customer_id)
+        
+        if consumption_records:
+            # Initialize totals
+            totals = {
+                'calories': 0,
+                'carbohydrates': 0,
+                'protein': 0,
+                'fat': 0,
+                'fiber': 0,
+                'sodium': 0
+            }
+            
+            # Create food cards for each record
+            food_cards = []
+            for record in consumption_records:
+                food_info = food_processor.db_client.get_food_info_by_id(record['food_id'])
+                if food_info:
+                    totals['calories'] += extract_number(food_info.get('Energy', '0'))
+                    totals['carbohydrates'] += extract_number(food_info.get('Carbohydrates', '0'))
+                    totals['protein'] += extract_number(food_info.get('Protein', '0'))
+                    totals['fat'] += extract_number(food_info.get('Fat', '0'))
+                    totals['fiber'] += extract_number(food_info.get('Dietary_Fiber', '0'))
+                    totals['sodium'] += extract_number(food_info.get('Sodium', '0'))
+                    
+                    # Create food card with time information
+                    food_cards.append(create_food_card(food_info, 1.0, record['time']))  # Added time parameter
+            
+            food_processor.db_client.close()
+            
+            if food_cards:
+                # Create warning and summary sections
+                warning_section = create_warning_section(totals, recommended_values)
+                summary_section = create_summary_section(totals, recommended_values)
+                
+                # Combine all food cards
+                food_records = "\n".join(food_cards)
+                
+                # Create full history HTML
+                history = f"""
+                {warning_section}
+                {summary_section}
+                <div style="margin-top: 20px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1em;">🍽️ 오늘 식사 기록</h3>
+                    {food_records}
+                </div>
+                """
+        else:
+            food_processor.db_client.close()
+            print("No previous records found")
+            history = ""
+
+    # if image is not present, return current history
     if image is None:
         error_html = f"""
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 

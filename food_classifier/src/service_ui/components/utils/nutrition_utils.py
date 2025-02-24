@@ -11,13 +11,24 @@ def extract_number(value):
     match = re.search(r'(\d+\.?\d*)', str(value))
     return float(match.group(1)) if match else 0.0
 
-def create_food_card(food_info, confidence):
+def create_food_card(food_info, confidence, consumption_time=None):
     """
     Create a card for food information
     """
-    # Use current time in KST
-    kst = timezone(timedelta(hours=9))
-    consumption_time = datetime.now(kst).strftime("%Y-%m-%d %H:%M")
+    # If consumption_time is not provided, use current time in KST
+    if consumption_time is None:
+        kst = timezone(timedelta(hours=9))
+        time_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M")
+    else:
+        # Format the existing KST time from DB
+        if isinstance(consumption_time, datetime):
+            time_str = consumption_time.strftime("%Y-%m-%d %H:%M")
+        else:
+            print(f"Warning: Unexpected time format: {consumption_time}")
+            kst = timezone(timedelta(hours=9))
+            time_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M")
+
+    print(f"Creating food card for {food_info.get('food_name', 'Unknown')} at {time_str}")
     
     return f"""
     <div style="padding: 15px; border-radius: 15px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden;">
@@ -25,7 +36,7 @@ def create_food_card(food_info, confidence):
             <div style="font-size: 1.1em; font-weight: bold;">{food_info.get('food_name', '알 수 없음')}</div>
             <div style="font-size: 0.9em; color: #666;">신뢰도: {confidence:.1f}%</div>
         </div>
-        <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">섭취 시간: {consumption_time}</div>
+        <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">섭취 시간: {time_str}</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
             <div>
                 <div style="font-size: 0.75em; color: #666;">에너지</div>
