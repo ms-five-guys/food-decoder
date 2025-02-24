@@ -62,6 +62,8 @@ class CustomerProcessor:
         response = requests.get(photo_url)
         image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        # Convert BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return cv2.resize(image, (300, 300))
     
     def _create_customer_detail_text(self, customer_info):
