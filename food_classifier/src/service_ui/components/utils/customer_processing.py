@@ -10,14 +10,13 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..',
 sys.path.append(parent_dir)
 
 from clients.db_client import DatabaseClient
-from .customer_session import current_session
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 class CustomerProcessor:
     def __init__(self, db_client=None):
         self.db_client = db_client or DatabaseClient()
     
-    def get_customer_info(self, customer_code, guardian_code):
+    def get_customer_info(self, customer_code, guardian_code, session_state):
         """Get customer information and visualize nutrition history"""
         if not customer_code or not guardian_code:
             return None, "고객 코드 또는 보호자 코드를 확인해주세요.", None
@@ -39,11 +38,11 @@ class CustomerProcessor:
                 # Process customer photo
                 photo = self._process_customer_photo(customer_info['photo_url'])
                 
-                # 고객 정보 설정
-                current_session.set_customer(customer_info)
+                # 고객 정보를 세션에 저장
+                session_state.set_customer(customer_info)
                 
                 # 고객 ID 사용
-                nutrition_info = self.db_client.get_customer_nutrition_info(current_session.customer_id)
+                nutrition_info = self.db_client.get_customer_nutrition_info(session_state.customer_id)
                 
                 # Create visualizations
                 customer_detail_text = self._create_customer_detail_text(customer_info)

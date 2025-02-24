@@ -36,7 +36,4 @@ class CustomerSession:
     
     def is_active(self):
         """Check if there is an active customer session"""
-        return self._customer_id is not None
-
-# Global instance
-current_session = CustomerSession() 
+        return self._customer_id is not None 
