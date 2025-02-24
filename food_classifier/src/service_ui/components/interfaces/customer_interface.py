@@ -32,20 +32,51 @@ def get_customer_details(customer_code, guardian_code, session_state):
 
 def create_customer_interface(session_state):
     """Create customer information interface"""
-    customer_info_interface = gr.Interface(
-        fn=get_customer_details,
-        inputs=[
-            gr.Textbox(label="고객 코드"),
-            gr.Textbox(label="보호자 코드", type="password"),
-            session_state
-        ],
-        outputs=[
-            gr.Image(label="고객 사진", width=300, height=300),
-            gr.HTML(label="고객 상세 정보"),
-            gr.Plot(label=" ")
-        ],
-        title="📱 고객 정보",
-        description="🔍 고객 코드와 보호자 코드를 입력하여 고객의 상세 정보를 확인하세요.",
-        theme="default"
-    )
-    return customer_info_interface 
+    with gr.Blocks() as customer_interface:
+        gr.Markdown("## 👨‍⚕️ 고객 정보")
+        
+        with gr.Row():
+            customer_code = gr.Textbox(label="고객 코드")
+            guardian_code = gr.Textbox(label="보호자 코드", type="password")
+            submit_btn = gr.Button("조회", variant="primary")
+            
+        with gr.Column():
+            customer_photo = gr.Image(label="고객 사진")
+            customer_info = gr.HTML()
+            nutrition_history = gr.Plot()
+            
+        def get_customer_details(code, guardian, state):
+            """Get customer details and create visualization"""
+            # 입력값 검증
+            if not code or not guardian:
+                gr.Warning("고객 코드 또는 보호자 코드를 확인해주세요.")
+                return None, "", None
+            
+            photo, info_text, plot = customer_processor.get_customer_info(
+                code, 
+                guardian,
+                state
+            )
+            
+            if photo is None:
+                gr.Error(info_text)
+                return None, "", None
+            
+            return photo, info_text, plot
+            
+        # Event handler - 버튼 클릭으로 변경
+        submit_btn.click(
+            fn=get_customer_details,
+            inputs=[
+                customer_code,
+                guardian_code,
+                session_state
+            ],
+            outputs=[
+                customer_photo,
+                customer_info,
+                nutrition_history
+            ]
+        )
+        
+    return customer_interface 
