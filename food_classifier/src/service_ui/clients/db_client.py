@@ -229,10 +229,9 @@ class DatabaseClient:
             print(f"Error recording food consumption: {str(err)}")
             return False
          
-    def get_today_consumption_by_patient(self, customer_code):
+    def get_today_consumption_by_patient(self, customer_id):
         """
-        Retrieve the customer_id by customer code and return today's consumption records.
-        For a customer code retrieve its customer_id and today's consumption records.
+        Retrieve today's consumption records for a given customer ID.
         """
         if not self.connection:
             print("No database connection.")
@@ -240,29 +239,21 @@ class DatabaseClient:
 
         try:
             cursor = self.connection.cursor(dictionary=True)
-
-            # Retrieve the customer_id from the customer table that matches the customer code
-            query_customer = """
-                SELECT customer_id
-                FROM customer
-                WHERE SUBSTRING_INDEX(code, '-', 1) = %s
-            """
-            cursor.execute(query_customer, (customer_code,))
-            customer = cursor.fetchone()
-
-            if not customer:
-                return None, "해당 환자코드를 가진 고객을 찾을 수 없습니다.", None
-
-            customer_id = customer['customer_id']
             
-            # In the consumption table retrieve records from the time column where the customer_id matches and the date is today
+            # Get current date in KST
+            kst = pytz.timezone('Asia/Seoul')
+            today = datetime.now(kst).date()
+            
+            # Get today's consumption records
             query_consumption = """
-                SELECT time
+                SELECT id, customer_id, food_id, time, date
                 FROM consumption
-                WHERE customer_id = %s AND DATE(time) = CURDATE()
+                WHERE customer_id = %s 
+                AND date = %s
+                ORDER BY time DESC
             """
 
-            cursor.execute(query_consumption, (customer_id,))
+            cursor.execute(query_consumption, (customer_id, today))
             consumption_records = cursor.fetchall()
 
             cursor.close()
