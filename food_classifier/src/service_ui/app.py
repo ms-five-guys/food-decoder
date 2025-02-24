@@ -12,8 +12,8 @@ demo = gr.TabbedInterface(
 
 # Run server
 if __name__ == "__main__":
-        demo.launch(
-            server_name="0.0.0.0",  # Allow external connections
-            server_port=7860,       # Specify port
-            share=True              # Generate public URL
-        )
+    demo.launch(
+        server_name="0.0.0.0",  # Allow external connections
+        server_port=7860,       # Specify port
+        share=True              # Generate public URL
+    )
