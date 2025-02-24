@@ -39,11 +39,10 @@ class CustomerProcessor:
                 photo = self._process_customer_photo(customer_info['photo_url'])
                 
                 # 고객 정보를 세션에 저장
-                session = session_state.value
-                session.set_customer(customer_info)
+                session_state.set_customer(customer_info)
                 
                 # 고객 ID 사용
-                nutrition_info = self.db_client.get_customer_nutrition_info(session.customer_id)
+                nutrition_info = self.db_client.get_customer_nutrition_info(session_state.customer_id)
                 
                 # Create visualizations
                 customer_detail_text = self._create_customer_detail_text(customer_info)

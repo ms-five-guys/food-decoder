@@ -38,11 +38,10 @@ class FoodProcessor:
             self.db_client.connect()
             food_info = self.db_client.get_food_info_from_db(food_name)
             
-            session = session_state.value
-            if food_info and session.is_active():
+            if food_info and session_state.is_active():
                 # Record food consumption
                 success = self.db_client.record_food_consumption(
-                    customer_id=session.customer_id,
+                    customer_id=session_state.customer_id,
                     food_id=food_info['food_id']
                 )
                 if not success:
@@ -75,13 +74,12 @@ class FoodProcessor:
         Get recommended nutritional values for the current customer
         """
         try:
-            session = session_state.value
-            if not session.is_active():
+            if not session_state.is_active():
                 print("No active customer session")
                 return None
                 
             self.db_client.connect()
-            recommended = self.db_client.get_recommended_nutrition(session.customer_id)
+            recommended = self.db_client.get_recommended_nutrition(session_state.customer_id)
             
             if recommended:
                 return {
