@@ -83,7 +83,8 @@ class CustomerProcessor:
     
     def _create_nutrition_plot(self, nutrition_info):
         """Create nutrition history plot in a single vertical column"""
-        dates = [nutrition['date'].strftime('%Y-%m-%d') for nutrition in nutrition_info['recent_nutrition']]
+        # Reverse the order of dates to ascending order
+        dates = [nutrition['date'].strftime('%Y-%m-%d') for nutrition in nutrition_info['recent_nutrition']][::-1]
         
         plot_configs = [
             {'data': 'total_calories', 'title': 'Calories', 'color': '#FF6B6B', 'ylabel': 'kcal', 'rec_key': 'calories'},
@@ -98,7 +99,8 @@ class CustomerProcessor:
         plt.rcParams['font.size'] = 14
 
         for idx, config in enumerate(plot_configs):
-            values = [nutrition[config['data']] for nutrition in nutrition_info['recent_nutrition']]
+            # Reverse the order of values to match dates
+            values = [nutrition[config['data']] for nutrition in nutrition_info['recent_nutrition']][::-1]
             rec_range = nutrition_info['recommended_nutrition'][config['rec_key']]
             min_val, max_val = rec_range['min'], rec_range['max']
             
