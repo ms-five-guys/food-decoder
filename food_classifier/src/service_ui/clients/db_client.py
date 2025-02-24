@@ -262,3 +262,30 @@ class DatabaseClient:
         except mysql.connector.Error as err:
             print(f"MySQL 에러: {str(err)}")
             return False
+
+    def get_food_info_by_id(self, food_id):
+        """
+        Query the nutrition database for food information based on the food_id.
+        Returns nutritional information from nutrition_info table.
+        """
+        if not self.connection:
+            print("No database connection.")
+            return None
+
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            
+            # Query for food information from nutrition_info table
+            cursor.execute("""
+                SELECT food_id, food_name, Energy, Carbohydrates, Protein, Fat, Dietary_Fiber, Sodium
+                FROM nutrition_info 
+                WHERE food_id = %s
+            """, (food_id,))
+            food_info = cursor.fetchone()
+            
+            cursor.close()
+            return food_info
+            
+        except mysql.connector.Error as err:
+            print("Database error:", str(err))
+            return None
