@@ -1,4 +1,6 @@
-# 🍽️ LinQu - 시니어 대상 음식 이미지 인식 서비스
+# <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=40&pause=1000&color=FFFFFF&center=true&vCenter=true&repeat=false&random=false&width=65&height=40&lines=Lin" alt="Lin" style="background-color: #E8F5E9;"/><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=40&pause=1000&color=90EE90&center=true&vCenter=true&repeat=false&random=false&width=55&height=40&lines=Qu" alt="Qu" style="background-color: #E8F5E9;"/> 
+
+> 🍽️ 시니어 대상 음식 이미지 인식 서비스 (Link you) LinQu
 
 ## 🌐 Service Information
 | Type | URL | Status |
@@ -6,6 +8,13 @@
 | Production | [nutricare.koreacentral.cloudapp.azure.com](https://nutricare.koreacentral.cloudapp.azure.com/) | 🟢 Active |
 
 > **Note**: 서비스 문제 발생 시 [이슈](https://github.com/ms-five-guys/food-decoder/issues)를 생성해주세요.
+
+## 👥 Team Five Guys
+- 김기덕 [@GideokKim](https://github.com/GideokKim)
+- 이희주 [@YiHeeJu](https://github.com/YiHeeJu)
+- 윤소영 [@Yoonsoyoung02](https://github.com/Yoonsoyoung02)
+- 박현열 [@yoplnaa](https://github.com/yoplnaa)
+- 김민석 [@BrianK64](https://github.com/BrianK64)
 
 ## 📝 프로젝트 개요
 Azure Custom Vision과 Azure Database for MySQL Flexible Server, Gradio를 활용한 시니어 대상 음식 이미지 인식 서비스입니다.
@@ -21,16 +30,26 @@ Azure Custom Vision과 Azure Database for MySQL Flexible Server, Gradio를 활�
 ### 🎨 Interface
 - 🖥️ Gradio (Python UI Library)
 - 📊 Matplotlib (Data Visualization)
-- 🎯 OpenCV (Image Processing)
+- 📸 OpenCV (Image Processing)
 
-### ⚙️ Backend
+### 🧠 AI/ML
+- 🧠 [Azure Custom Vision](https://learn.microsoft.com/ko-kr/azure/cognitive-services/custom-vision-service/) (ML Model)
+- 🔮 CNN Architecture
+- 🎯 ResNet50 (Deep Learning Model)
+- 🎨 Stable-diffusion (Image Generation)
+
+### ☁️ Cloud Infrastructure
+- ☁️ [Azure VM](https://learn.microsoft.com/ko-kr/azure/virtual-machines/) (Cloud Computing)
+- 🗃️ [Azure Database for MySQL Flexible Server](https://learn.microsoft.com/ko-kr/azure/mysql/flexible-server/)
+
+### 🚀 Deployment
+- 🔄 GitHub Actions (Continuous Deployment)
+- 🔐 GitHub Secrets (Secret Management)
+
+### 🔨 Development Tools
 - 🐍 Python 3.9+
-- 🧠 Azure Custom Vision (ML Model)
-- 🗃️ Azure Database for MySQL Flexible Server (Database)
-
-### 🔧 DevOps
-- ☁️ Azure VM (Cloud Platform)
-- 🚀 GitHub Actions with Secret Management (Continuous Deployment)
+- 📓 Jupyter Notebook
+- 📝 Git (Version Control)
 - 😜 [Gitmoji](https://gitmoji.dev/) (Commit Convention)
 
 ## 📁 프로젝트 구조
@@ -150,12 +169,5 @@ sequenceDiagram
 ## 🤝 Contributing
 프로젝트 기여 방법은 [CONTRIBUTING.md](.github/CONTRIBUTING.md)를 참고해주세요.
 
-## 👥 Team Five Guys
-- 김기덕 [@GideokKim](https://github.com/GideokKim) - ML/Backend
-- 이희주 [@YiHeeJu](https://github.com/YiHeeJu) - Frontend/UI
-- 윤소영 [@Yoonsoyoung02](https://github.com/Yoonsoyoung02) - Database
-- 박현열 [@yoplnaa](https://github.com/yoplnaa) - DevOps
-- 김민석 [@BrianK64](https://github.com/BrianK64) - Testing
-
 ## 📞 Support
-문제가 있으시다면 [이슈](../../issues)를 생성해주세요.
+문제가 있으시다면 [이슈](https://github.com/ms-five-guys/food-decoder/issues)를 생성해주세요.
