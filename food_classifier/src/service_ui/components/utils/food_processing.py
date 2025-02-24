@@ -8,15 +8,16 @@ sys.path.append(parent_dir)
 
 from clients.ml_client import MLClient
 from clients.db_client import DatabaseClient
-from .customer_session import current_session
 
 class FoodProcessor:
     def __init__(self, ml_client=None, db_client=None):
         self.ml_client = ml_client or MLClient()
         self.db_client = db_client or DatabaseClient()
     
-    def get_nutritional_info(self, image):
-        """Process food image and get nutritional information"""
+    def get_nutritional_info(self, image, session_state):
+        """
+        Process food image and get nutritional information
+        """
         if image is None:
             return {
                 'error': "No image captured",
@@ -37,10 +38,11 @@ class FoodProcessor:
             self.db_client.connect()
             food_info = self.db_client.get_food_info_from_db(food_name)
             
-            if food_info and current_session.is_active():
+            session = session_state.value
+            if food_info and session.is_active():
                 # Record food consumption
                 success = self.db_client.record_food_consumption(
-                    customer_id=current_session.customer_id,
+                    customer_id=session.customer_id,
                     food_id=food_info['food_id']
                 )
                 if not success:
@@ -68,15 +70,18 @@ class FoodProcessor:
                 'confidence': 0
             }
 
-    def get_recommended_values(self):
-        """Get recommended nutritional values for the current customer"""
+    def get_recommended_values(self, session_state):
+        """
+        Get recommended nutritional values for the current customer
+        """
         try:
-            if not current_session.is_active():
+            session = session_state.value
+            if not session.is_active():
                 print("No active customer session")
                 return None
                 
             self.db_client.connect()
-            recommended = self.db_client.get_recommended_nutrition(current_session.customer_id)
+            recommended = self.db_client.get_recommended_nutrition(session.customer_id)
             
             if recommended:
                 return {

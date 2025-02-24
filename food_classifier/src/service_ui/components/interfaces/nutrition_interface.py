@@ -18,11 +18,12 @@ from utils.nutrition_utils import (
 # Initialize processor
 food_processor = FoodProcessor()
 
-def process_and_append(image, history):
-    """Process new image and append result to history"""
-
+def process_and_append(image, history, session_state):
+    """
+    Process new image and append result to history
+    """
     # Get recommended values first
-    recommended_values = food_processor.get_recommended_values()
+    recommended_values = food_processor.get_recommended_values(session_state)
     if not recommended_values:
         error_html = """
         <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; margin-bottom: 20px; 
@@ -48,7 +49,7 @@ def process_and_append(image, history):
         """
         return history + error_html if history else error_html, history if history else ""
     
-    result = food_processor.get_nutritional_info(image)
+    result = food_processor.get_nutritional_info(image, session_state)
     
     if not result or 'food_info' not in result:
         error_html = f"""
@@ -174,8 +175,10 @@ def extract_totals_from_html(html, recommended):
             'sodium': 0
         }
 
-def create_nutrition_interface():
-    """Create nutritional information interface"""
+def create_nutrition_interface(session_state):
+    """
+    Create nutritional information interface
+    """
     with gr.Blocks() as nutritional_info_interface:
         gr.Markdown("## 🥗 오늘의 식단 정보")
 
@@ -201,8 +204,10 @@ def create_nutrition_interface():
         # State to store the history
         result_state = gr.State("")
 
-        def process_with_error_handling(image, history):
-            """Image processing and error handling"""
+        def process_with_error_handling(image, history, session_state):
+            """
+            Image processing and error handling
+            """
             if image is None:
                 error_html = f"""
                 <div style="padding: 15px; border-radius: 15px; border: 1px solid #FF5252; 
@@ -217,7 +222,7 @@ def create_nutrition_interface():
 
             # if image is present, process
             try:
-                result = process_and_append(image, history)
+                result = process_and_append(image, history, session_state)
                 return "", result[0], result[1]  # empty error message, result, new history
             except Exception as e:
                 error_html = f"""
@@ -233,7 +238,7 @@ def create_nutrition_interface():
 
         submit_btn.click(
             fn=process_with_error_handling,
-            inputs=[image_input, result_state],
+            inputs=[image_input, result_state, session_state],
             outputs=[error_output, result_output, result_state]
         )
 
