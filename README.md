@@ -119,6 +119,9 @@ sequenceDiagram
 ## 📝 라이선스
 이 프로젝트는 [라이선스명] 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
 
+## 📝 기여하기
+프로젝트 기여 방법은 [CONTRIBUTING.md](.github/CONTRIBUTING.md)를 참고해주세요.
+
 ## ✨ 팀원
 - 김기덕 - [GitHub](https://github.com/GideokKim)
 - 이희주 - [GitHub](https://github.com/YiHeeJu)
