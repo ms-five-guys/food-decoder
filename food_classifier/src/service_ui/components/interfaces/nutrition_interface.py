@@ -64,8 +64,8 @@ def process_and_append(image, history, session_state):
                     totals['fiber'] += extract_number(food_info.get('Dietary_Fiber', '0'))
                     totals['sodium'] += extract_number(food_info.get('Sodium', '0'))
                     
-                    # Create food card
-                    food_cards.append(create_food_card(food_info, 1.0))  # confidence as 1.0 for historical records
+                    # Create food card with time information
+                    food_cards.append(create_food_card(food_info, 1.0, record['time']))  # Added time parameter
             
             food_processor.db_client.close()
             
