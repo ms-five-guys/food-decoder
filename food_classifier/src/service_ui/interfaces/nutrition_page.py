@@ -230,11 +230,11 @@ def extract_totals_from_html(html, recommended):
             'sodium': 0
         }
 
-def create_nutrition_interface(session_state):
+def create_nutrition_page(session_state):
     """
-    Create nutritional information interface
+    Create nutritional information page
     """
-    with gr.Blocks() as nutritional_info_interface:
+    with gr.Blocks() as nutrition_page:
         gr.Markdown("## 🥗 오늘의 식단 정보")
 
         with gr.Row():
@@ -297,4 +297,4 @@ def create_nutrition_interface(session_state):
             outputs=[error_output, result_output, result_state]
         )
 
-    return nutritional_info_interface 
+    return nutrition_page 
