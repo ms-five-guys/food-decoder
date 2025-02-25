@@ -1,7 +1,7 @@
 import gradio as gr
 from pages.customer_page import create_customer_page
 from pages.nutrition_page import create_nutrition_page
-from utils.customer_session import CustomerSession
+from processors.customer_session import CustomerSession
 
 def create_demo():
     """Create Gradio demo with session management"""

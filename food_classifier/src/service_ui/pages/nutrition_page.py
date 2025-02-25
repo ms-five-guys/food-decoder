@@ -7,8 +7,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-from utils.food_processing import FoodProcessor
-from utils.nutrition_utils import (
+from processors.food_processing import FoodProcessor
+from processors.nutrition_utils import (
     create_food_card,
     create_summary_section,
     create_warning_section,
