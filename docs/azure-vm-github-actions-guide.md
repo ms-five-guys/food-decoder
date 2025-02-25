@@ -1,15 +1,15 @@
-# Azure VM과 GitHub Actions 연동 가이드
+# 🔄 Azure VM과 GitHub Actions 연동 가이드
 
 이 가이드는 GitHub Actions를 사용하여 Azure VM에 지속적 배포를 설정하는 방법을 설명합니다.
 
-## 사전 요구사항
+## 🔧 사전 요구사항
 
 - 활성 구독이 있는 Azure 계정
 - GitHub 저장소
 - Ubuntu가 실행되는 Azure VM
 - VM에 대한 SSH 접근 권한
 
-## 1. Azure VM 설정
+## 1. 🖥️ Azure VM 설정
 
 > 이미 Azure VM Resource를 생성하였다고 가정합니다.
 
@@ -82,7 +82,7 @@ ssh -i 최초 발급 받은 vm 개인키.pem azureuser@VM_IP_ADDRESS
    - SSH (22)
    - 애플리케이션 포트 (Gradio용 7860)
 
-## 2. GitHub 저장소 구성
+## 2. 📦 GitHub 저장소 구성
 
 ### 2.1 GitHub Secrets 추가
 저장소 Settings → Secrets and variables → Actions에서 추가:
@@ -185,7 +185,7 @@ jobs:
 
 이 워크플로우는 코드가 main 브랜치에 병합될 때마다 자동으로 실행되어 VM에 최신 코드를 배포합니다.
 
-## 3. 서비스 구성
+## 3. 🛠️ 서비스 구성
 
 ### 3.1 Systemd 서비스 생성
 ```bash
@@ -227,7 +227,7 @@ sudo systemctl status food-classifier
 sudo systemctl stop food-classifier
 ```
 
-## 4. 환경 변수
+## 4. ⚙️ 환경 변수
 
 `/etc/food-classifier/`에 `.env` 파일 생성:
 ```bash
@@ -237,7 +237,7 @@ AZURE_CUSTOM_VISION_PROJECT_ID="your_project_id"
 AZURE_CUSTOM_VISION_MODEL_NAME="your_model_name"
 ```
 
-## 5. 비용 관리
+## 5. 💰 비용 관리
 
 ### 5.1 자동 종료 구성
 1. Azure 포털 → VM → 작업 → 자동 종료로 이동
@@ -253,7 +253,7 @@ az vm stop --resource-group myResourceGroup --name myVM
 az vm start --resource-group myResourceGroup --name myVM
 ```
 
-## 6. 문제 해결
+## 6. 🔍 문제 해결
 
 ### 6.1 서비스 로그 확인
 ```bash
@@ -275,7 +275,7 @@ sudo journalctl -u food-classifier -n 50
    - Azure NSG에서 포트 7860 개방 확인
    - VM 실행 여부 확인
 
-## 7. 유지보수
+## 7. 🔄 유지보수
 
 ### 7.1 의존성 업데이트
 ```bash
@@ -290,7 +290,7 @@ sudo apt update
 sudo apt upgrade
 ```
 
-## 8. 보안 고려사항
+## 8. 🔒 보안 고려사항
 
 1. SSH 키 안전하게 보관
 2. 시스템 패키지 정기적 업데이트
@@ -298,7 +298,7 @@ sudo apt upgrade
 4. VM 접근 로그 모니터링
 5. 방화벽 규칙 적절히 구성
 
-## 9. 추가 자료
+## 9. 📚 추가 자료
 
 - [Azure VM 문서](https://docs.microsoft.com/azure/virtual-machines/)
 - [GitHub Actions 문서](https://docs.github.com/actions)
