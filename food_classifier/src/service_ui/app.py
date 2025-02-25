@@ -1,6 +1,6 @@
 import gradio as gr
-from interfaces.customer_page import create_customer_page
-from interfaces.nutrition_page import create_nutrition_page
+from pages.customer_page import create_customer_page
+from pages.nutrition_page import create_nutrition_page
 from utils.customer_session import CustomerSession
 
 def create_demo():
