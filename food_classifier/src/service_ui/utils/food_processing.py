@@ -3,7 +3,7 @@ import sys
 import io
 
 # Add the parent directory to the system path
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(parent_dir)
 
 from communicators.ml_communicator import MLCommunicator

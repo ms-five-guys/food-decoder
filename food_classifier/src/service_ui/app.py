@@ -1,7 +1,7 @@
 import gradio as gr
-from components.interfaces.customer_interface import create_customer_interface
-from components.interfaces.nutrition_interface import create_nutrition_interface
-from components.utils.customer_session import CustomerSession
+from interfaces.customer_interface import create_customer_interface
+from interfaces.nutrition_interface import create_nutrition_interface
+from utils.customer_session import CustomerSession
 
 def create_demo():
     """Create Gradio demo with session management"""
