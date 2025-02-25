@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import pytz
 
-class DatabaseClient:
+class DBCommunicator:
     def __init__(self):
         """
         Initialize the database client with connection parameters.

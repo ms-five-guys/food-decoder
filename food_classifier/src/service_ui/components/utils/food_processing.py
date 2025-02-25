@@ -7,12 +7,12 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..',
 sys.path.append(parent_dir)
 
 from clients.ml_communicator import MLCommunicator
-from clients.db_client import DatabaseClient
+from clients.db_communicator import DBCommunicator
 
 class FoodProcessor:
-    def __init__(self, ml_communicator=None, db_client=None):
+    def __init__(self, ml_communicator=None, db_communicator=None):
         self.ml_communicator = ml_communicator or MLCommunicator()
-        self.db_client = db_client or DatabaseClient()
+        self.db_communicator = db_communicator or DBCommunicator()
     
     def get_nutritional_info(self, image, session_state):
         """
@@ -35,19 +35,19 @@ class FoodProcessor:
             food_name, confidence = self.ml_communicator.get_food_prediction(img_bytes)
             
             # Get nutritional information
-            self.db_client.connect()
-            food_info = self.db_client.get_food_info_from_db(food_name)
+            self.db_communicator.connect()
+            food_info = self.db_communicator.get_food_info_from_db(food_name)
             
             if food_info and session_state.is_active():
                 # Record food consumption
-                success = self.db_client.record_food_consumption(
+                success = self.db_communicator.record_food_consumption(
                     customer_id=session_state.customer_id,
                     food_id=food_info['food_id']
                 )
                 if not success:
                     print(f"Failed to record food consumption for food_id: {food_info['food_id']}")
             
-            self.db_client.close()
+            self.db_communicator.close()
             
             if not food_info:
                 return {
@@ -78,8 +78,8 @@ class FoodProcessor:
                 print("No active customer session")
                 return None
                 
-            self.db_client.connect()
-            recommended = self.db_client.get_recommended_nutrition(session_state.customer_id)
+            self.db_communicator.connect()
+            recommended = self.db_communicator.get_recommended_nutrition(session_state.customer_id)
             
             if recommended:
                 return {
@@ -96,4 +96,4 @@ class FoodProcessor:
             print(f"Error getting recommended values: {str(e)}")
             return None
         finally:
-            self.db_client.close() 
+            self.db_communicator.close() 

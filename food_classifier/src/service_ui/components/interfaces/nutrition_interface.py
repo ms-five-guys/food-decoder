@@ -38,8 +38,8 @@ def process_and_append(image, history, session_state):
 
     # Get today's consumption history if no history exists
     if not history:
-        food_processor.db_client.connect()
-        consumption_records = food_processor.db_client.get_today_consumption_by_patient(session_state.customer_id)
+        food_processor.db_communicator.connect()
+        consumption_records = food_processor.db_communicator.get_today_consumption_by_patient(session_state.customer_id)
         
         if consumption_records:
             # Initialize totals
@@ -55,7 +55,7 @@ def process_and_append(image, history, session_state):
             # Create food cards for each record
             food_cards = []
             for record in consumption_records:
-                food_info = food_processor.db_client.get_food_info_by_id(record['food_id'])
+                food_info = food_processor.db_communicator.get_food_info_by_id(record['food_id'])
                 if food_info:
                     totals['calories'] += extract_number(food_info.get('Energy', '0'))
                     totals['carbohydrates'] += extract_number(food_info.get('Carbohydrates', '0'))
@@ -67,7 +67,7 @@ def process_and_append(image, history, session_state):
                     # Create food card with time information
                     food_cards.append(create_food_card(food_info, 1.0, record['time']))  # Added time parameter
             
-            food_processor.db_client.close()
+            food_processor.db_communicator.close()
             
             if food_cards:
                 # Create warning and summary sections
@@ -87,7 +87,7 @@ def process_and_append(image, history, session_state):
                 </div>
                 """
         else:
-            food_processor.db_client.close()
+            food_processor.db_communicator.close()
             print("No previous records found")
             history = ""
 
