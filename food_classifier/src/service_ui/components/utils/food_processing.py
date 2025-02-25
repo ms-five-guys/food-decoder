@@ -6,8 +6,8 @@ import io
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.append(parent_dir)
 
-from clients.ml_communicator import MLCommunicator
-from clients.db_communicator import DBCommunicator
+from communicators.ml_communicator import MLCommunicator
+from communicators.db_communicator import DBCommunicator
 
 class FoodProcessor:
     def __init__(self, ml_communicator=None, db_communicator=None):

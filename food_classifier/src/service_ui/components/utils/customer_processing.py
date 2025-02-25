@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.append(parent_dir)
 
-from clients.db_communicator import DBCommunicator
+from communicators.db_communicator import DBCommunicator
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 class CustomerProcessor:
