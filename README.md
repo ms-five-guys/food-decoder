@@ -52,25 +52,6 @@ Azure Custom Vision과 Azure Database for MySQL Flexible Server, Gradio를 활�
 - 📝 Git (Version Control)
 - 😜 [Gitmoji](https://gitmoji.dev/) (Commit Convention)
 
-## 📁 프로젝트 구조
-```
-food_classifier/
-├── custom_vision/                   # Azure Custom Vision
-├── docs/                            # 문서
-├── experiments/                     # 실험 결과
-├── food_classifier/
-│   ├── src/
-│   │   ├── service_ui/              # Gradio UI 컴포넌트
-│   │   │   ├── clients/             # 외부 서비스 통신
-│   │   │   │   ├── ml_client.py     # Azure Custom Vision 통신
-│   │   │   │   ├── db_client.py     # Azure Database for MySQL DB Flexible Server 통신
-│   │   │   ├── components/          # UI 컴포넌트
-│   │   │   │   ├── interfaces/      # 인터페이스 정의
-│   │   │   │   ├── utils/           # UI 유틸리티
-│   │   │   └── app.py               # 메인 UI 애플리케이션
-└── requirements.txt                 # 프로젝트 의존성
-```
-
 ## 📊 System Interaction Flow
 이 섹션은 `service_ui` 모듈을 통해 사용자와 시스템 간의 상호작용을 두 가지 주요 흐름으로 설명합니다. 첫 번째 흐름은 고객 정보와 최근 영양 성분 섭취 정보를 조회하는 과정이며, 두 번째 흐름은 이미지를 처리하여 영양 정보를 제공하는 과정입니다.
 
