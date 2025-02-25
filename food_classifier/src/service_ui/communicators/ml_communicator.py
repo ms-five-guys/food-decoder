@@ -3,7 +3,7 @@ from msrest.authentication import ApiKeyCredentials
 import os
 from pathlib import Path
 
-class MLClient:
+class MLCommunicator:
     def __init__(self):
         """
         Initialize the ML client with Azure Custom Vision configuration.

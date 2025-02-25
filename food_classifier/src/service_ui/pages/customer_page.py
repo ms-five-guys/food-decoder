@@ -6,7 +6,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-from utils.customer_processing import CustomerProcessor
+from processors.customer_processing import CustomerProcessor
 
 # Initialize processor
 customer_processor = CustomerProcessor()
@@ -30,9 +30,9 @@ def get_customer_details(customer_code, guardian_code, session_state):
     
     return photo, info_text, plot
 
-def create_customer_interface(session_state):
-    """Create customer information interface"""
-    with gr.Blocks() as customer_interface:
+def create_customer_page(session_state):
+    """Create customer information page"""
+    with gr.Blocks() as customer_page:
         gr.Markdown("## 👨‍⚕️ 고객 정보")
         
         with gr.Row():
@@ -79,4 +79,4 @@ def create_customer_interface(session_state):
             ]
         )
         
-    return customer_interface 
+    return customer_page

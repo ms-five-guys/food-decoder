@@ -6,15 +6,15 @@ import requests
 import matplotlib.pyplot as plt
 
 # Add the parent directory to the system path
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(parent_dir)
 
-from clients.db_client import DatabaseClient
+from communicators.db_communicator import DBCommunicator
 plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle')
 
 class CustomerProcessor:
-    def __init__(self, db_client=None):
-        self.db_client = db_client or DatabaseClient()
+    def __init__(self, db_communicator=None):
+        self.db_communicator = db_communicator or DBCommunicator()
     
     def get_customer_info(self, customer_code, guardian_code, session_state):
         """Get customer information and visualize nutrition history"""
@@ -22,16 +22,16 @@ class CustomerProcessor:
             return None, "고객 코드 또는 보호자 코드를 확인해주세요.", None
         
         try:
-            self.db_client.connect()
+            self.db_communicator.connect()
             
             # 고객 코드와 보호자 코드를 합쳐서 하나의 코드로 생성
             combined_code = f"{customer_code}-{guardian_code}"
             
             # 고객 기본 정보 조회
-            customer_info = self.db_client.get_customer_basic_info(combined_code)
+            customer_info = self.db_communicator.get_customer_basic_info(combined_code)
             
             if not customer_info:
-                self.db_client.close()
+                self.db_communicator.close()
                 return None, "고객 정보를 찾을 수 없습니다.", None
             
             try:
@@ -42,7 +42,7 @@ class CustomerProcessor:
                 session_state.set_customer(customer_info)
                 
                 # 고객 ID 사용
-                nutrition_info = self.db_client.get_customer_nutrition_info(session_state.customer_id)
+                nutrition_info = self.db_communicator.get_customer_nutrition_info(session_state.customer_id)
                 
                 # Create visualizations
                 customer_detail_text = self._create_customer_detail_text(customer_info)
@@ -51,7 +51,7 @@ class CustomerProcessor:
                 return photo, customer_detail_text, nutrition_plot
                 
             finally:
-                self.db_client.close()
+                self.db_communicator.close()
             
         except Exception as e:
             return None, f"오류가 발생했습니다: {str(e)}", None

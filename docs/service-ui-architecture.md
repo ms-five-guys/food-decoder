@@ -24,8 +24,8 @@ service_ui/
 
 ### 2.2 주요 모듈
 1. **외부 시스템 연동 모듈**
-   - `CustomVisionCommunicator`: Azure Custom Vision 연동
-   - `CustomerDataCommunicator`: MySQL 데이터베이스 연동
+   - `MLCommunicator`: Azure Custom Vision 연동
+   - `DBCommunicator`: Azure Database for MySQL Flexible Server 연동
 
 2. **페이지 모듈**
    - `CustomerPage`: 고객 정보 관리 화면

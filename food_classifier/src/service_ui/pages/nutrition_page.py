@@ -7,8 +7,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-from utils.food_processing import FoodProcessor
-from utils.nutrition_utils import (
+from processors.food_processing import FoodProcessor
+from processors.nutrition_utils import (
     create_food_card,
     create_summary_section,
     create_warning_section,
@@ -38,8 +38,8 @@ def process_and_append(image, history, session_state):
 
     # Get today's consumption history if no history exists
     if not history:
-        food_processor.db_client.connect()
-        consumption_records = food_processor.db_client.get_today_consumption_by_patient(session_state.customer_id)
+        food_processor.db_communicator.connect()
+        consumption_records = food_processor.db_communicator.get_today_consumption_by_patient(session_state.customer_id)
         
         if consumption_records:
             # Initialize totals
@@ -55,7 +55,7 @@ def process_and_append(image, history, session_state):
             # Create food cards for each record
             food_cards = []
             for record in consumption_records:
-                food_info = food_processor.db_client.get_food_info_by_id(record['food_id'])
+                food_info = food_processor.db_communicator.get_food_info_by_id(record['food_id'])
                 if food_info:
                     totals['calories'] += extract_number(food_info.get('Energy', '0'))
                     totals['carbohydrates'] += extract_number(food_info.get('Carbohydrates', '0'))
@@ -65,9 +65,9 @@ def process_and_append(image, history, session_state):
                     totals['sodium'] += extract_number(food_info.get('Sodium', '0'))
                     
                     # Create food card with time information
-                    food_cards.append(create_food_card(food_info, 1.0, record['time']))  # Added time parameter
+                    food_cards.append(create_food_card(food_info, 100.0, record['time']))  # Added time parameter
             
-            food_processor.db_client.close()
+            food_processor.db_communicator.close()
             
             if food_cards:
                 # Create warning and summary sections
@@ -87,7 +87,7 @@ def process_and_append(image, history, session_state):
                 </div>
                 """
         else:
-            food_processor.db_client.close()
+            food_processor.db_communicator.close()
             print("No previous records found")
             history = ""
 
@@ -230,11 +230,11 @@ def extract_totals_from_html(html, recommended):
             'sodium': 0
         }
 
-def create_nutrition_interface(session_state):
+def create_nutrition_page(session_state):
     """
-    Create nutritional information interface
+    Create nutritional information page
     """
-    with gr.Blocks() as nutritional_info_interface:
+    with gr.Blocks() as nutrition_page:
         gr.Markdown("## 🥗 오늘의 식단 정보")
 
         with gr.Row():
@@ -297,4 +297,4 @@ def create_nutrition_interface(session_state):
             outputs=[error_output, result_output, result_state]
         )
 
-    return nutritional_info_interface 
+    return nutrition_page 
