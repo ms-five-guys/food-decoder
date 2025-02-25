@@ -6,12 +6,12 @@ import io
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.append(parent_dir)
 
-from clients.ml_client import MLClient
+from clients.ml_communicator import MLCommunicator
 from clients.db_client import DatabaseClient
 
 class FoodProcessor:
-    def __init__(self, ml_client=None, db_client=None):
-        self.ml_client = ml_client or MLClient()
+    def __init__(self, ml_communicator=None, db_client=None):
+        self.ml_communicator = ml_communicator or MLCommunicator()
         self.db_client = db_client or DatabaseClient()
     
     def get_nutritional_info(self, image, session_state):
@@ -32,7 +32,7 @@ class FoodProcessor:
             img_bytes = img_byte_arr.getvalue()
             
             # Get food prediction
-            food_name, confidence = self.ml_client.get_food_prediction(img_bytes)
+            food_name, confidence = self.ml_communicator.get_food_prediction(img_bytes)
             
             # Get nutritional information
             self.db_client.connect()
