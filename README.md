@@ -5,7 +5,7 @@
 ## 🌐 Service Information
 | Type | URL | Status |
 |------|-----|--------|
-| Production | [nutricare.koreacentral.cloudapp.azure.com](https://nutricare.koreacentral.cloudapp.azure.com/) | 🟢 Active |
+| Production | [nutricare.koreacentral.cloudapp.azure.com](https://nutricare.koreacentral.cloudapp.azure.com/) | 🔴 Deactivated |
 
 > **Note**: 서비스 문제 발생 시 [이슈](https://github.com/ms-five-guys/food-decoder/issues)를 생성해주세요.
 
